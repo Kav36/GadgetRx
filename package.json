@@ -1,0 +1,32 @@
+{
+  "name": "nodemon-example",
+  "version": "1.0.0",
+  "description": "Example Node.js application with nodemon",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon app.js",
+    "restart-on-error": "node restart-on-error.js",
+    "start-all": "npm start & npm run restart-on-error"
+  },
+  "author": "Kavindu Madulakshan",
+  "license": "MIT",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.2",
+    "cheerio": "^1.0.0-rc.12",
+    "cors": "^2.8.5",
+    "csv-parser": "^3.0.0",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "express-validator": "^7.0.1",
+    "googleapis": "^134.0.0",
+    "multer": "^1.4.5-lts.1",
+    "mysql": "^2.18.1",
+    "mysql2": "^3.6.5",
+    "nodemailer": "^6.9.12",
+    "path": "^0.12.7",
+    "request": "^2.88.2",
+    "stream": "^0.0.2"
+  }
+}
