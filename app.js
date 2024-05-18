@@ -21,33 +21,33 @@ const app = express();
 const PORT = process.env.PORT;
 
 const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
 });
 const connection = mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
 });
 
 connection.connect((err) => {
-  if (err) throw err;
-  console.log("Connected to MySQL database");
+    if (err) throw err;
+    console.log("Connected to MySQL database");
 });
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "data/uploads/");
-  },
-  filename: (req, file, cb) => {
-    cb(
-      null,
-      file.fieldname + "-" + Date.now() + path.extname(file.originalname)
-    );
-  },
+    destination: (req, file, cb) => {
+        cb(null, "data/uploads/");
+    },
+    filename: (req, file, cb) => {
+        cb(
+            null,
+            file.fieldname + "-" + Date.now() + path.extname(file.originalname)
+        );
+    },
 });
 
 const upload = multer({ storage: storage });
@@ -69,64 +69,126 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/static", express.static(path.join(__dirname, "public")));
 
 app.use(
-  session({
-    secret: "your_secret_key",
-    resave: true,
-    saveUninitialized: true,
-  })
+    session({
+        secret: "your_secret_key",
+        resave: true,
+        saveUninitialized: true,
+    })
 );
 
 function getConnectionFromPool() {
-  return new Promise((resolve, reject) => {
-    pool.getConnection((err, connection) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(connection);
-      }
+    return new Promise((resolve, reject) => {
+        pool.getConnection((err, connection) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(connection);
+            }
+        });
     });
-  });
 }
 app.use("/", express.static(path.join(__dirname, "")));
 
 app.listen(PORT, () => {
     console.log(`Server is listening on port ${PORT}`);
+});
+
+const transporter = nodemailer.createTransport({
+    service: config.email.service,
+    auth: {
+        user: config.email.user,
+        pass: config.email.pass
+    }
+});
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'html/index.html'));
   });
+
+  app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'html/signin.html'));
+  });
+
 const generateOTP = () => Math.floor(1000 + Math.random() * 9000);
 
-app.post('/signup_shop', async (req, res) => {
+app.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+  
+    if (!email || !password) {
+      return res.send('<script>alert("Please enter email and password!"); window.location.href="/";</script>');
+    }
+  
+    connection.query('SELECT * FROM t_user WHERE email = ?', [email], async (error, results) => {
+      if (error) {
+        console.error('Error executing MySQL query:', error);
+        return res.status(500).send('Internal server error');
+      }
+  
+      if (results.length === 0) {
+        return res.send('<script>alert("User not found!"); window.location.href="/login";</script>');
+      }
+  
+      const storedPassword = results[0].password;
+      try {
+        const passwordMatch = await bcrypt.compare(password, storedPassword);
+  
+        if (!passwordMatch) {
+          return res.send('<script>alert("Incorrect email or password!"); window.location.href="/login";</script>');
+        }
+  
+        req.session.loggedin = true;
+        req.session.userId = results[0].id; // Store user ID in the session for further use
+  
+        return res.redirect('html/dashboard_user.html');
+      } catch (bcryptError) {
+        console.error('Error comparing passwords:', bcryptError);
+        return res.status(500).send('Internal server error');
+      }
+    });
+  });
+
+  app.post('/signup_shop', async (req, res) => {
     const { owner_username, name, shop_email, contactnum, shop_type, shop_des, latitude, longitude, password, otp } = req.body;
+
+    if (!owner_username || !name || !shop_email || !contactnum || !shop_type || !shop_des || !latitude || !longitude || !password || !otp) {
+        return res.status(400).json({ message: "One or more fields are empty!" });
+    }
 
     try {
         const otpVerification = await verifyOTPFromDatabase(shop_email, otp);
 
         if (!otpVerification) {
-            return res.status(400).send('<script>alert("Invalid OTP!");</script>');
+            return res.status(400).json({ message: "Invalid OTP!" });
         }
 
         const userExists = await checkUserExists_person(owner_username);
 
         if (!userExists) {
-            return res.status(400).send('<script>alert("Invalid mail for owner!");</script>');
+            return res.status(400).json({ message: "Invalid email for owner!" });
         }
 
         const shopExists = await checkUserExistsByEmail_shop(shop_email);
 
         if (shopExists) {
-            return res.status(400).send('<script>alert("Email for shop exsits!");</script>');
+            return res.status(400).json({ message: "Email for shop exists!" });
         }
 
-        connection.query('INSERT INTO t_shop (owner_username, name, shop_email, contactnum, shop_type, shop_des, latitude, longitude, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)  ON DUPLICATE KEY UPDATE owner_email = VALUES(owner_email), name = VALUES(name), shop_email = VALUES(shop_email), contactnum = VALUES(contactnum), shop_type = VALUES(shop_type), shop_des = VALUES(shop_des), latitude = VALUES(latitude), longitude = VALUES(longitude), password = VALUES(password);', [owner_email, name, shop_email, contactnum, shop_type, shop_des, latitude, longitude, hashedPassword], (err, results) => {
-            if (err) {
-                console.error('Failed to save shop details:', err);
-                return res.status(500).send('<script>alert("Failed to save shop details");</script>');
+        const hashedPassword = await bcrypt.hash(password, 10);
+        connection.query(
+            'INSERT INTO t_shop (owner_username, name, shop_email, contactnum, shop_type, shop_des, latitude, longitude, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)  ON DUPLICATE KEY UPDATE owner_email = VALUES(owner_email), name = VALUES(name), shop_email = VALUES(shop_email), contactnum = VALUES(contactnum), shop_type = VALUES(shop_type), shop_des = VALUES(shop_des), latitude = VALUES(latitude), longitude = VALUES(longitude), password = VALUES(password);', 
+            [owner_email, name, shop_email, contactnum, shop_type, shop_des, latitude, longitude, hashedPassword], 
+            (err, results) => {
+                if (err) {
+                    console.error('Failed to save shop details:', err);
+                    return res.status(500).json({ message: "Failed to save shop details" });
+                }
+                console.log('Shop details saved successfully');
+                return res.status(200).json({ message: "Sign up successful" });
             }
-            console.log('Shop details saved successfully');
-            return res.status(200).json({ message: "Sign up successful" });
-        });
+        );
     } catch (error) {
         console.error('Error during signup:', error);
-        return res.status(500).send('<script>alert("Failed to save shop details");</script>');
+        return res.status(500).json({ message: "Failed to save shop details" });
     }
 });
 
@@ -183,7 +245,7 @@ app.post('/sendOTP_shop', async (req, res) => {
     try {
         const shopExists = await checkUserExistsByEmail_shop(email);
         if (shopExists) {
-            return res.status(400).send('<script>alert("Email for shop exsits!");</script>');
+            return res.status(400).json({ message: "Email for shop exists!" });
         }
 
         const otp = generateOTP();
@@ -209,88 +271,109 @@ app.post('/sendOTP_shop', async (req, res) => {
     Thank you for choosing us. We look forward to serving you.
     
     Best regards,
-    Team GadgetSOS.`
+    Team GadgetRx.`
         };
 
         connection.query('INSERT INTO otp_table (email, otp, timeout) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE otp=VALUES(otp), timeout=VALUES(timeout)', [email, otp, otpTimeout], (err, results) => {
             if (err) {
                 console.error('Failed to store OTP in database:', err);
-                return res.send('<script>alert("Error occurred! Please try again");</script>');
+                return res.status(500).json({ message: "Error occurred! Please try again" });
             }
 
             transporter.sendMail(mailOptions, (error, info) => {
                 if (error) {
                     console.error('Failed to send OTP email:', error);
-                    return res.send('<script>alert("Failed to send OTP email");</script>');
+                    return res.status(500).json({ message: "Failed to send OTP email" });
                 }
                 console.log('Email sent:', info.response);
-                return res.send('<script>alert("OTP sent successfully!");</script>');
+                return res.status(200).json({ message: "OTP sent successfully!" });
             });
         });
     } catch (error) {
         console.error('Error during sending OTP:', error);
-        return res.send('<script>alert("Internal Server Error");</script>');
+        return res.status(500).json({ message: "Internal Server Error" });
     }
 });
 
 app.post('/signup_technician', async (req, res) => {
     const { shop_email, tech_email, tech_des, shop_type } = req.body;
 
+    if (!shop_email || !tech_email || !tech_des || !shop_type) {
+        return res.status(400).json({ message: "One or more fields are empty!" });
+    }
+
     try {
         const userExists = await checkUserExistsByEmail_person(tech_email);
 
         if (!userExists) {
-            return res.status(400).send('<script>alert("Invalid email for technician!");</script>');
+            return res.status(400).json({ message: "Invalid email for technician!" });
         }
 
         const shopExists = await checkUserExistsByEmail_shop(shop_email);
 
         if (!shopExists) {
-            return res.status(400).send('<script>alert("Shop email does not exist!");</script>');
+            return res.status(400).json({ message: "Shop email does not exist!" });
         }
 
-        connection.query('INSERT INTO t_technician (shop_email, tech_email, tech_des, shop_type) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE tech_des = VALUES(tech_des), shop_type = VALUES(shop_type); ', [shop_email, tech_email, tech_des, shop_type], (techErr, techResults) => {
-            if (techErr) {
-                console.error('Failed to save technician details:', techErr);
-                return res.status(500).send('<script>alert("Failed to save technician details");</script>');
+        connection.query(
+            'INSERT INTO t_technician (shop_email, tech_email, tech_des, shop_type) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE tech_des = VALUES(tech_des), shop_type = VALUES(shop_type);', 
+            [shop_email, tech_email, tech_des, shop_type], 
+            (techErr, techResults) => {
+                if (techErr) {
+                    console.error('Failed to save technician details:', techErr);
+                    return res.status(500).json({ message: "Failed to save technician details" });
+                }
+                console.log('Technician details saved successfully');
+                return res.status(200).json({ message: "Sign up successful" });
             }
-            console.log('Technician details saved successfully');
-            return res.status(200).json({ message: "Sign up successful" });
-        });
+        );
     } catch (error) {
         console.error('Error during technician signup:', error);
-        return res.status(500).send('<script>alert("Failed to save technician details");</script>');
+        return res.status(500).json({ message: "Failed to save technician details" });
     }
 });
 
 app.post('/signup_user', async (req, res) => {
-    const { name, username,email, contactnum, latitude, longitude, password, otp } = req.body;
+    const { name, username, email, contactnum, latitude, longitude, password, otp } = req.body;
 
-    if (!name || !username ||!email || !contactnum || !latitude || !longitude || !password || !otp) {
-        return res.status(400).send('<script>alert("One or more fields are empty!");</script>');
+    if (!name || !username || !email || !contactnum || !latitude || !longitude || !password || !otp) {
+        return res.status(400).json({ message: "One or more fields are empty!" });
     }
 
     try {
         const userExists = await checkUserExistsByEmail_person(email);
         if (userExists) {
-            return res.status(400).send('<script>alert("Email already exists!");</script>');
+            return res.status(400).json({ message: "Email already exists!" });
         }
 
-        const userExists1 = await checkUserExists_person(username);
-        if (userExists) {
-            return res.status(400).send('<script>alert("Email already exists!");</script>');
+        const otpVerification = await verifyOTPFromDatabase(email, otp);
+        if (!otpVerification) {
+            return res.status(400).json({ message: "Invalid OTP!" });
         }
-        connection.query('INSERT INTO t_user (name, username, email, contactnum, latitude, longitude, password, otp) VALUES (?, ?, ?, ?, ?, ?, ?,?) ON DUPLICATE KEY UPDATE name = VALUES(name), email = VALUES(email),contactnum = VALUES(contactnum), latitude = VALUES(latitude), longitude = VALUES(longitude), password = VALUES(password), otp = VALUES(otp)', [name, email, contactnum, latitude, longitude, password, otp], (err, results) => {
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const query = `
+            INSERT INTO t_user (name, username, email, contactnum, latitude, longitude, password)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+                name = VALUES(name),
+                username = VALUES(username),
+                contactnum = VALUES(contactnum),
+                latitude = VALUES(latitude),
+                longitude = VALUES(longitude),
+                password = VALUES(password)
+        `;
+
+        connection.query(query, [name, username, email, contactnum, latitude, longitude, hashedPassword], (err, results) => {
             if (err) {
                 console.error('Failed to save user details:', err);
-                return res.status(500).send('<script>alert("Failed to save user details");</script>');
+                return res.status(500).json({ message: "Failed to save user details" });
             }
-            console.log('User details saved successfully');
             return res.status(200).json({ message: "Sign up successful" });
         });
     } catch (error) {
         console.error('Error during user signup:', error);
-        return res.status(500).send('<script>alert("Failed to save user details");</script>');
+        return res.status(500).json({ message: "Failed to save user details" });
     }
 });
 
@@ -298,9 +381,9 @@ app.post('/sendOTP_user', async (req, res) => {
     const { email } = req.body;
 
     try {
-        const userExists = await checkUserExistsByEmail_person(_email);
+        const userExists = await checkUserExistsByEmail_person(email);
         if (!userExists) {
-            return res.status(400).send('<script>alert("Invalid mail for owner!");</script>');
+            return res.status(400).json({ message: "Invalid email for owner!" });
         }
 
         const otp = generateOTP();
@@ -326,38 +409,132 @@ app.post('/sendOTP_user', async (req, res) => {
     Thank you for choosing us. We look forward to serving you.
     
     Best regards,
-    Team GadgetSOS.`
+    Team GadgetRx.`
         };
 
         connection.query('INSERT INTO otp_table (email, otp, timeout) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE otp=VALUES(otp), timeout=VALUES(timeout)', [email, otp, otpTimeout], (err, results) => {
             if (err) {
                 console.error('Failed to store OTP in database:', err);
-                return res.send('<script>alert("Error occurred! Please try again");</script>');
+                return res.status(500).json({ message: "Error occurred! Please try again" });
             }
 
             transporter.sendMail(mailOptions, (error, info) => {
                 if (error) {
                     console.error('Failed to send OTP email:', error);
-                    return res.send('<script>alert("Failed to send OTP email");</script>');
+                    return res.status(500).json({ message: "Failed to send OTP email" });
                 }
                 console.log('Email sent:', info.response);
-                return res.send('<script>alert("OTP sent successfully!");</script>');
+                return res.status(200).json({ message: "OTP sent successfully!" });
             });
         });
     } catch (error) {
         console.error('Error during sending OTP:', error);
-        return res.send('<script>alert("Internal Server Error");</script>');
+        return res.status(500).json({ message: "Internal Server Error" });
     }
 });
 
-  app.get("/shops", (req, res) => {
+app.post('/sendOTP_user_signup', async (req, res) => {
+    const { email } = req.body;
+
+    try {
+        const userExists = await checkUserExistsByEmail_person(email);
+        if (userExists) {
+            return res.status(400).json({ message: "Email already exits! Please signin" });
+        }
+
+        const otp = generateOTP();
+        const otpTimeout = new Date();
+        otpTimeout.setMinutes(otpTimeout.getMinutes() + 30);
+
+        const mailOptions = {
+            from: config.email.user,
+            to: email,
+            subject: 'One-Time Password (OTP) for Email Verification',
+            text: `Dear User,
+    
+    Thank you for taking the time to verify your email address with us. To proceed with your registration, please use the following One-Time Password (OTP):
+    
+    OTP: ${otp}
+    
+    Your security is our priority, and this OTP ensures that only authorized users gain access to our platform. Please enter the OTP within the specified time frame to complete the verification process successfully.
+    
+    For your security, please do not share this OTP with anyone. Our system is designed to protect your information, and sharing your OTP may compromise your account's security.
+    
+    If you did not initiate this request, or if you encounter any issues during the verification process, please contact our support team immediately for assistance.
+    
+    Thank you for choosing us. We look forward to serving you.
+    
+    Best regards,
+    Team GadgetRx.`
+        };
+
+        connection.query('INSERT INTO otp_table (email, otp, timeout) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE otp=VALUES(otp), timeout=VALUES(timeout)', [email, otp, otpTimeout], (err, results) => {
+            if (err) {
+                console.error('Failed to store OTP in database:', err);
+                return res.status(500).json({ message: "Error occurred! Please try again" });
+            }
+
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.error('Failed to send OTP email:', error);
+                    return res.status(500).json({ message: "Failed to send OTP email" });
+                }
+                console.log('Email sent:', info.response);
+                return res.status(200).json({ message: "OTP sent successfully!" });
+            });
+        });
+    } catch (error) {
+        console.error('Error during sending OTP:', error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+});
+
+app.post('/forget_pw', async (req, res) => {
+    const { email, password, otp } = req.body;
+
+    if (!email || !password || !otp) {
+        return res.status(400).json({ message: "One or more fields are empty!" });
+    }
+
+    try {
+        const userExists = await checkUserExistsByEmail_person(email);
+        if (!userExists) {
+            return res.status(400).json({ message: "Email does not exist!" });
+        }
+        const otpVerification = await verifyOTPFromDatabase(email, otp);
+
+        if (!otpVerification) {
+            return res.status(400).json({ message: "Invalid OTP!" });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const query = `
+            UPDATE t_user SET password = ? WHERE email = ?
+        `;
+
+        connection.query(query, [hashedPassword, email], (err, results) => {
+            if (err) {
+                console.error('Failed to update user details:', err);
+                return res.status(500).json({ message: "Failed to update user details" });
+            }
+            console.log('User details updated successfully');
+            return res.status(200).json({ message: "Password reset successful" });
+        });
+    } catch (error) {
+        console.error('Error during password reset:', error);
+        return res.status(500).json({ message: "Failed to reset password" });
+    }
+});
+
+app.get("/shops", (req, res) => {
     const query = "SELECT * FROM t_shop";
-  
+
     connection.query(query, (err, results) => {
-      if (err) {
-        console.error("Error executing MySQL query: " + err.stack);
-        return res.status(500).send("Internal Server Error");
-      }
-      res.json(results);
+        if (err) {
+            console.error("Error executing MySQL query: " + err.stack);
+            return res.status(500).send("Internal Server Error");
+        }
+        res.json(results);
     });
-  });
+});
+

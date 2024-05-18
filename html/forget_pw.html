@@ -7,13 +7,7 @@
   <title>GadgetRx</title>
   <link rel="shortcut icon" type="image/png" href="../assets/images/logos/favicon.png" />
   <link rel="stylesheet" href="../assets/css/styles.min.css" />
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCDx78wjiGh46Ei1oL-9b8M1-5zogF1VXs&&libraries=places"></script>
-  <style>
-    #map {
-      width: 100%;
-      height: 100%;
-    }
-  </style>
+  <script src="../assets/script/script.js"></script>
 </head>
 
 <body>
@@ -30,8 +24,7 @@
                 <a href="./index.html" class="text-nowrap logo-img text-center d-block py-3 w-100">
                   <img src="../assets/images/logos/logo.svg" alt="">
                 </a>
-                <p class="text-center">Your Social Campaigns</p>
-                <form id="">
+                <form>
                   <div class="mb-3">
                       <label for="email" class="form-label">Email address</label>
                       <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp">
@@ -41,22 +34,17 @@
                       <label for="password" class="form-label">Password</label>
                       <input type="password" class="form-control" id="password" name="password">
                   </div>
-                  <div>
-                    <div class="row">
+                  <div class="row">
                       <label for="otp" class="form-label">OTP</label>
                       <div class="col-md-8 mb-3">
-                        <input type="text" class="form-control" id="otp" name="otp">
+                          <input type="text" class="form-control" id="otp" name="otp">
                       </div>
                       <div class="col-md-4">
-                        <button type="button" class="btn btn-primary w-100 py-2 fs-4 mb-4 rounded-2" id="sendOTPBtn" onclick="sendOTP_user()">Send OTP</button>
+                          <button type="button" class="btn btn-primary w-100 py-2 fs-4 mb-4 rounded-2" id="sendOTPBtn" onclick="sendOTP_user()">Send OTP</button>
                       </div>
-                    </div>
-                    
                   </div>
-                  
-                  
-                  <button type="submit" class="btn btn-primary w-100 py-8 fs-4 mb-4 rounded-2" onclick="signup_user()">Change Password</button>
-                </form>
+                  <button type="button" class="btn btn-primary w-100 py-8 fs-4 mb-4 rounded-2" onclick="forget_pw()">Change Password</button>
+              </form>
               </div>
             </div>
           </div>
@@ -67,23 +55,7 @@
   <script src="../assets/libs/jquery/dist/jquery.min.js"></script>
   <script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
-  <script>
-    let map;
-
-    function initMap() {
-      map = new google.maps.Map(document.getElementById('map'), {
-        center: {lat: -34.397, lng: 150.644},
-        zoom: 15
-      });
-
-      // Add event listener to update latitude and longitude input when map is clicked
-      map.addListener('click', function(event) {
-        document.getElementById('latitude').value = event.latLng.lat();
-        document.getElementById('longitude').value = event.latLng.lng();
-      });
-    }
-    initMap();
-  </script>
+  
 </body>
 
 </html>
