@@ -1,5 +1,5 @@
 function signup_shop() {
-    const owner_username = document.getElementById("owner_username").value;
+    const owner_email = document.getElementById("owner_email").value;
     const name = document.getElementById("name").value;
     const shop_email = document.getElementById("shop_email").value;
     const contactnum = document.getElementById("contactnum").value;
@@ -10,13 +10,13 @@ function signup_shop() {
     const password = document.getElementById("password").value;
     const otp = document.getElementById("otp").value;
 
-    if (!owner_username || !name || !shop_email || !contactnum || !shop_type || !shop_des || !latitude || !longitude || !password || !otp) {
+    if (!owner_email || !name || !shop_email || !contactnum || !shop_type || !shop_des || !latitude || !longitude || !password || !otp) {
         alert("One or more fields are empty!");
         return;
     }
 
     const formData = {
-        owner_username: owner_username,
+        owner_email: owner_email,
         name: name,
         shop_email: shop_email,
         contactnum: contactnum,
@@ -35,22 +35,22 @@ function signup_shop() {
         },
         body: JSON.stringify(formData),
     })
-    .then((response) => {
-        return response.json().then((data) => {
+        .then((response) => response.json().then((data) => {
             if (!response.ok) {
-                throw new Error(data.message || 'Unknown error');
+                alert(data.message || 'Unknown error');
             }
-            return data;
+            else {
+                alert(data.message || "Sign up successful!");
+            }
+        }))
+        .then((data) => {
+            alert(data.message || "Sign up successful!");
+
+        })
+        .catch((error) => {
+            console.error("Error signing up:", error);
+            alert(error.message || "Error signing up. Please try again later.");
         });
-    })
-    .then((data) => {
-        alert(data.message || "Sign up successful!");
-        window.location.href = "/login";
-    })
-    .catch((error) => {
-        console.error("Error signing up:", error);
-        alert(error.message || "Error signing up. Please try again later.");
-    });
 }
 
 function sendOTP_shop() {
@@ -69,21 +69,21 @@ function sendOTP_shop() {
             },
             body: JSON.stringify(formData),
         })
-        .then((response) => {
-            return response.json().then((data) => {
-                if (!response.ok) {
-                    throw new Error(data.message || 'Unknown error');
-                }
-                return data;
+            .then((response) => {
+                return response.json().then((data) => {
+                    if (!response.ok) {
+                        alert(data.message || 'Unknown error');
+                    }
+                    return data;
+                });
+            })
+            .then((data) => {
+                alert(data.message || "OTP sent successfully!");
+            })
+            .catch((error) => {
+                console.error("Error sending OTP:", error);
+                alert(error.message || "Error sending OTP. Please try again later.");
             });
-        })
-        .then((data) => {
-            alert(data.message || "OTP sent successfully!");
-        })
-        .catch((error) => {
-            console.error("Error sending OTP:", error);
-            alert(error.message || "Error sending OTP. Please try again later.");
-        });
     }
 }
 
@@ -112,21 +112,21 @@ function signup_technician() {
         },
         body: JSON.stringify(formData),
     })
-    .then((response) => {
-        return response.json().then((data) => {
-            if (!response.ok) {
-                throw new Error(data.message || 'Unknown error');
-            }
-            return data;
+        .then((response) => {
+            return response.json().then((data) => {
+                if (!response.ok) {
+                    alert(data.message || 'Unknown error');
+                }
+                return data;
+            });
+        })
+        .then((data) => {
+            alert(data.message || "Sign up successful!");
+        })
+        .catch((error) => {
+            console.error("Error signing up:", error);
+            alert(error.message || "Error signing up. Please try again later.");
         });
-    })
-    .then((data) => {
-        alert(data.message || "Sign up successful!");
-    })
-    .catch((error) => {
-        console.error("Error signing up:", error);
-        alert(error.message || "Error signing up. Please try again later.");
-    });
 }
 
 function signup_user() {
@@ -139,7 +139,7 @@ function signup_user() {
     const password = document.getElementById("password").value;
     const otp = document.getElementById("otp").value;
 
-    if (!name || !username ||!email || !contactnum || !latitude || !longitude || !password || !otp) {
+    if (!name || !username || !email || !contactnum || !latitude || !longitude || !password || !otp) {
         alert("One or more fields are empty!");
         return;
     }
@@ -162,22 +162,24 @@ function signup_user() {
         },
         body: JSON.stringify(formData),
     })
-    .then((response) => {
-        return response.json().then((data) => {
-            if (!response.ok) {
-                throw new Error(data.message || 'Unknown error');
-            }
-            return data;
+        .then((response) => {
+            return response.json().then((data) => {
+                if (!response.ok) {
+                    console.error("Server returned an error response:", data);
+                    throw new Error(data.message || 'Unknown error');
+                }
+                console.log("Successful response:", data);
+                return data;
+            });
+        })
+        .then((data) => {
+            console.log("Showing success alert with message:", data.message);
+            alert(data.message);
+        })
+        .catch((error) => {
+            console.error("Error signing up:", error);
+            alert(error.message || "Error signing up. Please try again later.");
         });
-    })
-    .then((data) => {
-        alert(data.message);
-        window.location.href = "/login";
-    })
-    .catch((error) => {
-        console.error("Error signing up:", error);
-        alert(error.message || "Error signing up. Please try again later.");
-    });
 }
 
 function forget_pw() {
@@ -203,22 +205,22 @@ function forget_pw() {
         },
         body: JSON.stringify(formData),
     })
-    .then((response) => {
-        return response.json().then((data) => {
-            if (!response.ok) {
-                throw new Error(data.message || 'Unknown error');
-            }
-            return data;
+        .then((response) => {
+            return response.json().then((data) => {
+                if (!response.ok) {
+                    alert(data.message || 'Unknown error');
+                }
+                return data;
+            });
+        })
+        .then((data) => {
+            alert(data.message || "Password reset successful!");
+
+        })
+        .catch((error) => {
+            console.error("Error resetting password:", error);
+            alert(error.message || "Error resetting password. Please try again later.");
         });
-    })
-    .then((data) => {
-        alert(data.message || "Password reset successful!");
-        window.location.href = "/login";
-    })
-    .catch((error) => {
-        console.error("Error resetting password:", error);
-        alert(error.message || "Error resetting password. Please try again later.");
-    });
 }
 
 function sendOTP_user() {
@@ -237,21 +239,21 @@ function sendOTP_user() {
             },
             body: JSON.stringify(formData),
         })
-        .then((response) => {
-            return response.json().then((data) => {
-                if (!response.ok) {
-                    throw new Error(data.message || 'Unknown error');
-                }
-                return data;
+            .then((response) => {
+                return response.json().then((data) => {
+                    if (!response.ok) {
+                        alert(data.message || 'Unknown error');
+                    }
+                    return data;
+                });
+            })
+            .then((data) => {
+                alert(data.message);
+            })
+            .catch((error) => {
+                console.error("Error saving data:", error);
+                alert(error.message || "Error sending OTP. Please try again later.");
             });
-        })
-        .then((data) => {
-            alert(data.message);
-        })
-        .catch((error) => {
-            console.error("Error saving data:", error);
-            alert(error.message || "Error sending OTP. Please try again later.");
-        });
     }
 }
 
@@ -271,20 +273,20 @@ function sendOTP_user_signup() {
             },
             body: JSON.stringify(formData),
         })
-        .then((response) => {
-            return response.json().then((data) => {
-                if (!response.ok) {
-                    throw new Error(data.message || 'Unknown error');
-                }
-                return data;
+            .then((response) => {
+                return response.json().then((data) => {
+                    if (!response.ok) {
+                        alert(data.message || 'Unknown error');
+                    }
+                    return data;
+                });
+            })
+            .then((data) => {
+                alert(data.message);
+            })
+            .catch((error) => {
+                console.error("Error saving data:", error);
+                alert(error.message || "Error sending OTP. Please try again later.");
             });
-        })
-        .then((data) => {
-            alert(data.message);
-        })
-        .catch((error) => {
-            console.error("Error saving data:", error);
-            alert(error.message || "Error sending OTP. Please try again later.");
-        });
     }
 }

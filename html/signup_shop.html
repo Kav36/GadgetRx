@@ -7,6 +7,7 @@
   <title>GadgetRx</title>
   <link rel="shortcut icon" type="image/png" href="../assets/images/logos/favicon.png" />
   <link rel="stylesheet" href="../assets/css/styles.min.css" />
+  <script src="../assets/script/script.js"></script>
   <script
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCDx78wjiGh46Ei1oL-9b8M1-5zogF1VXs&&libraries=places"></script>
   <style>
@@ -18,7 +19,6 @@
 </head>
 
 <body>
-  <!--  Body Wrapper -->
   <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
     data-sidebar-position="fixed" data-header-position="fixed">
     <div
@@ -33,8 +33,8 @@
                 </a>
                 <form id="signupForm">
                   <div class="mb-3">
-                    <label for="owner_username" class="form-label">Owner User Name</label>
-                    <input type="email" class="form-control" id="owner_username" name="owner_username"
+                    <label for="owner_email" class="form-label">Owner Email</label>
+                    <input type="email" class="form-control" id="owner_email" name="owner_email"
                       aria-describedby="emailHelp">
                     <small id="emailHelp" class="form-text text-muted">Need to create user account Before creating
                       shop.</small>
@@ -73,7 +73,9 @@
                     <input type="text" class="form-control" id="longitude" name="longitude">
                   </div>
                   <div class="mb-3">
-                    <label for="longitude" class="form-label">Location</label>
+                    <label for="address" class="form-label">Location</label>
+                    <input type="text" class="form-control" id="address" name="address" disabled>
+                    <small id="emailHelp" class="form-text text-muted">Select your location in map.</small>
                   </div>
                   <div id="map" style="height: 400px; margin-top: 10px;"></div>
                   <div class="mb-3">
@@ -105,23 +107,88 @@
   <script src="../assets/libs/jquery/dist/jquery.min.js"></script>
   <script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
-  <script>
+    <script>
     let map;
     let geocoder;
 
     function initMap() {
-      geocoder = new google.maps.Geocoder();
       map = new google.maps.Map(document.getElementById('map'), {
-        center: {lat: -34.397, lng: 150.644},
         zoom: 15
       });
+      geocoder = new google.maps.Geocoder();
+
+      // Get user's current location
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const pos = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            };
+            map.setCenter(pos);
+            document.getElementById('latitude').value = pos.lat;
+            document.getElementById('longitude').value = pos.lng;
+            geocodeLatLng(geocoder, pos.lat, pos.lng);
+
+            // Add marker to the map at user's location
+            new google.maps.Marker({
+              position: pos,
+              map: map
+            });
+          },
+          () => {
+            handleLocationError(true, map.getCenter());
+          }
+        );
+      } else {
+        // Browser doesn't support Geolocation
+        handleLocationError(false, map.getCenter());
+      }
 
       // Add event listener to update latitude and longitude input when map is clicked
       map.addListener('click', function(event) {
-        document.getElementById('latitude').value = event.latLng.lat();
-        document.getElementById('longitude').value = event.latLng.lng();
+        let lat = event.latLng.lat();
+        let lng = event.latLng.lng();
+        document.getElementById('latitude').value = lat;
+        document.getElementById('longitude').value = lng;
+        geocodeLatLng(geocoder, lat, lng);
+
+        // Add marker to the map at the clicked location
+        new google.maps.Marker({
+          position: event.latLng,
+          map: map
+        });
       });
     }
+
+    function geocodeLatLng(geocoder, lat, lng) {
+      const latlng = {
+        lat: parseFloat(lat),
+        lng: parseFloat(lng)
+      };
+      geocoder.geocode({
+        location: latlng
+      }, (results, status) => {
+        if (status === "OK") {
+          if (results[0]) {
+            document.getElementById('address').value = results[0].formatted_address;
+          } else {
+            window.alert("No results found");
+          }
+        } else {
+          window.alert("Geocoder failed due to: " + status);
+        }
+      });
+    }
+
+    function handleLocationError(browserHasGeolocation, pos) {
+      window.alert(
+        browserHasGeolocation
+          ? "Error: The Geolocation service failed."
+          : "Error: Your browser doesn't support geolocation."
+      );
+    }
+
     initMap();
   </script>
 </body>

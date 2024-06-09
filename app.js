@@ -103,92 +103,96 @@ const transporter = nodemailer.createTransport({
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'html/index.html'));
-  });
+});
 
-  app.get('/login', (req, res) => {
+app.get('/login', (req, res) => {
     res.sendFile(path.join(__dirname, 'html/signin.html'));
-  });
+});
+
+app.get('/signup_user.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'html/signup_user.html'));
+});
 
 const generateOTP = () => Math.floor(1000 + Math.random() * 9000);
 
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
-  
+
     if (!email || !password) {
-      return res.send('<script>alert("Please enter email and password!"); window.location.href="/";</script>');
+        return res.send('<script>alert("Please enter email and password!"); window.location.href="/";</script>');
     }
-  
+
     connection.query('SELECT * FROM t_user WHERE email = ?', [email], async (error, results) => {
-      if (error) {
-        console.error('Error executing MySQL query:', error);
-        return res.status(500).send('Internal server error');
-      }
-  
-      if (results.length === 0) {
-        return res.send('<script>alert("User not found!"); window.location.href="/login";</script>');
-      }
-  
-      const storedPassword = results[0].password;
-      try {
-        const passwordMatch = await bcrypt.compare(password, storedPassword);
-  
-        if (!passwordMatch) {
-          return res.send('<script>alert("Incorrect email or password!"); window.location.href="/login";</script>');
+        if (error) {
+            console.error('Error executing MySQL query:', error);
+            return res.status(500).send('Internal server error');
         }
-  
-        req.session.loggedin = true;
-        req.session.userId = results[0].id; // Store user ID in the session for further use
-  
-        return res.redirect('html/dashboard_user.html');
-      } catch (bcryptError) {
-        console.error('Error comparing passwords:', bcryptError);
-        return res.status(500).send('Internal server error');
-      }
+
+        if (results.length === 0) {
+            return res.send('<script>alert("User not found!"); window.location.href="/login";</script>');
+        }
+
+        const storedPassword = results[0].password;
+        try {
+            const passwordMatch = await bcrypt.compare(password, storedPassword);
+
+            if (!passwordMatch) {
+                return res.send('<script>alert("Incorrect email or password!"); window.location.href="/login";</script>');
+            }
+
+            req.session.loggedin = true;
+            req.session.userId = results[0].id; // Store user ID in the session for further use
+
+            return res.redirect('html/dashboard_user.html');
+        } catch (bcryptError) {
+            console.error('Error comparing passwords:', bcryptError);
+            return res.status(500).send('Internal server error');
+        }
     });
-  });
+});
 
-  app.post('/signup_shop', async (req, res) => {
-    const { owner_username, name, shop_email, contactnum, shop_type, shop_des, latitude, longitude, password, otp } = req.body;
+app.post('/signup_shop', async (req, res) => {
+    const { owner_email, name, shop_email, contactnum, shop_type, shop_des, latitude, longitude, password, otp } = req.body;
 
-    if (!owner_username || !name || !shop_email || !contactnum || !shop_type || !shop_des || !latitude || !longitude || !password || !otp) {
+    if (!owner_email || !name || !shop_email || !contactnum || !shop_type || !shop_des || !latitude || !longitude || !password || !otp) {
         return res.status(400).json({ message: "One or more fields are empty!" });
     }
 
     try {
         const otpVerification = await verifyOTPFromDatabase(shop_email, otp);
-
         if (!otpVerification) {
             return res.status(400).json({ message: "Invalid OTP!" });
         }
 
-        const userExists = await checkUserExists_person(owner_username);
-
+        const userExists = await checkUserExists_person(owner_email);
         if (!userExists) {
             return res.status(400).json({ message: "Invalid email for owner!" });
         }
 
         const shopExists = await checkUserExistsByEmail_shop(shop_email);
-
         if (shopExists) {
-            return res.status(400).json({ message: "Email for shop exists!" });
+            return res.status(400).json({ message: "Email already exists!" });
         }
 
+        const userExists1 = await checkUserExists_person(shop_email);
+        if (userExists1) {
+            return res.status(400).json({ message: "Already used email!" });
+        }
         const hashedPassword = await bcrypt.hash(password, 10);
         connection.query(
-            'INSERT INTO t_shop (owner_username, name, shop_email, contactnum, shop_type, shop_des, latitude, longitude, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)  ON DUPLICATE KEY UPDATE owner_email = VALUES(owner_email), name = VALUES(name), shop_email = VALUES(shop_email), contactnum = VALUES(contactnum), shop_type = VALUES(shop_type), shop_des = VALUES(shop_des), latitude = VALUES(latitude), longitude = VALUES(longitude), password = VALUES(password);', 
-            [owner_email, name, shop_email, contactnum, shop_type, shop_des, latitude, longitude, hashedPassword], 
-            (err, results) => {
+            'INSERT INTO t_shop (owner_email, name, shop_email, contactnum, shop_type, shop_des, latitude, longitude, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE owner_email = VALUES(owner_email), name = VALUES(name), shop_email = VALUES(shop_email), contactnum = VALUES(contactnum), shop_type = VALUES(shop_type), shop_des = VALUES(shop_des), latitude = VALUES(latitude), longitude = VALUES(longitude), password = VALUES(password);',
+            [owner_email, name, shop_email, contactnum, shop_type, shop_des, latitude, longitude, hashedPassword],
+            (err) => {
                 if (err) {
                     console.error('Failed to save shop details:', err);
-                    return res.status(500).json({ message: "Failed to save shop details" });
+                    return res.status(400).json({ message: "Failed to save shop details" });
                 }
-                console.log('Shop details saved successfully');
-                return res.status(200).json({ message: "Sign up successful" });
+                return res.status(400).json({ message: "Sign up successful" });
             }
         );
     } catch (error) {
         console.error('Error during signup:', error);
-        return res.status(500).json({ message: "Failed to save shop details" });
+        return res.status(400).json({ message: "Failed to save shop details" });
     }
 });
 
@@ -217,7 +221,7 @@ const checkUserExistsByEmail_person = (email) => {
 
 const checkUserExists_person = (username) => {
     return new Promise((resolve, reject) => {
-        connection.query('SELECT email FROM t_user WHERE username = ?', [username], (err, results) => {
+        connection.query('SELECT email FROM t_user WHERE email = ?', [username], (err, results) => {
             if (err) {
                 return reject(err);
             }
@@ -229,7 +233,7 @@ const checkUserExists_person = (username) => {
 
 const checkUserExistsByEmail_shop = (email) => {
     return new Promise((resolve, reject) => {
-        connection.query('SELECT shop_email FROM t_shop WHERE email = ?', [email], (err, results) => {
+        connection.query('SELECT shop_email FROM t_shop WHERE shop_email = ?', [email], (err, results) => {
             if (err) {
                 return reject(err);
             }
@@ -245,7 +249,12 @@ app.post('/sendOTP_shop', async (req, res) => {
     try {
         const shopExists = await checkUserExistsByEmail_shop(email);
         if (shopExists) {
-            return res.status(400).json({ message: "Email for shop exists!" });
+            return res.status(400).json({ message: "Email already exists!" });
+        }
+
+        const userExists = await checkUserExists_person(email);
+        if (userExists) {
+            return res.status(400).json({ message: "Email already exists!" });
         }
 
         const otp = generateOTP();
@@ -316,8 +325,8 @@ app.post('/signup_technician', async (req, res) => {
         }
 
         connection.query(
-            'INSERT INTO t_technician (shop_email, tech_email, tech_des, shop_type) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE tech_des = VALUES(tech_des), shop_type = VALUES(shop_type);', 
-            [shop_email, tech_email, tech_des, shop_type], 
+            'INSERT INTO t_technician (shop_email, tech_email, tech_des, shop_type) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE tech_des = VALUES(tech_des), shop_type = VALUES(shop_type);',
+            [shop_email, tech_email, tech_des, shop_type],
             (techErr, techResults) => {
                 if (techErr) {
                     console.error('Failed to save technician details:', techErr);
@@ -343,6 +352,11 @@ app.post('/signup_user', async (req, res) => {
     try {
         const userExists = await checkUserExistsByEmail_person(email);
         if (userExists) {
+            return res.status(400).json({ message: "Email already exists!" });
+        }
+
+        const shopExists = await checkUserExistsByEmail_shop(email);
+        if (shopExists) {
             return res.status(400).json({ message: "Email already exists!" });
         }
 
