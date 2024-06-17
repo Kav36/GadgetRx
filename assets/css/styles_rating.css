@@ -1,0 +1,55 @@
+.rating {
+    border: none;
+    justify-content: center;
+    margin-top: 20px;
+    position: relative;
+}
+
+.myratings {
+    font-size: 85px;
+    color: green;
+}
+
+.rating > [id^="star"] { display: none; }
+.rating > label:before {
+    margin: 5px;
+    font-size: 2.25em;
+    font-family: FontAwesome;
+    display: inline-block;
+    content: "\f005";
+}
+
+.rating > .half:before {
+    content: "\f089";
+    position: absolute;
+}
+
+.rating > label {
+    color: #cfcfcf;
+    float: right;
+}
+
+/***** CSS Magic to Highlight Stars on Hover *****/
+
+.rating > [id^="star"]:checked ~ label,
+.rating:not(:checked) > label:hover,
+.rating:not(:checked) > label:hover ~ label { color: #FFD700; }
+
+.rating > [id^="star"]:checked + label:hover,
+.rating > [id^="star"]:checked ~ label:hover,
+.rating > label:hover ~ [id^="star"]:checked ~ label,
+.rating > [id^="star"]:checked ~ label:hover ~ label { color: #FFED85; }
+
+.reset-option {
+    display: none;
+}
+
+
+
+
+
+
+
+
+
+

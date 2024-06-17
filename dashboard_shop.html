@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GadgetRx</title>
+  <link rel="shortcut icon" type="image/png" href="../assets/images/logos/favicon.png" />
+  <link rel="stylesheet" href="../assets/css/styles.min.css" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <script
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCDx78wjiGh46Ei1oL-9b8M1-5zogF1VXs&&libraries=places"></script>
+  <script src="assets/script/script.js"></script>
+<style>
+  #map {
+    width: 100%;
+    height: 100%;
+  }
+</style>
+  <style>
+    .star-rating {
+    direction: rtl;
+    display: inline-block;
+}
+
+.star-rating input[type="radio"] {
+    display: none;
+}
+
+.star-rating label {
+    font-size: 2em;
+    color: #ddd;
+    cursor: pointer;
+}
+
+.star-rating label:hover,
+.star-rating label:hover ~ label,
+.star-rating input[type="radio"]:checked ~ label {
+    color: #f7d106;
+}
+.stars-outer {
+  display: inline-block;
+  font-size: 1rem;
+  unicode-bidi: bidi-override;
+  color: #666666;
+  position: relative;
+}
+
+.stars-inner {
+  display: inline-block;
+  position: relative;
+  white-space: nowrap;
+  overflow: hidden;
+  color: #ffc107; 
+}
+
+  </style>
+</head>
+
+<body>
+  <!--  Body Wrapper -->
+  <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+    data-sidebar-position="fixed" data-header-position="fixed">
+    <!-- Sidebar Start -->
+    <aside class="left-sidebar">
+      <!-- Sidebar scroll-->
+      <div>
+        <div class="brand-logo d-flex align-items-center justify-content-between">
+          <a href="./index.html" class="text-nowrap logo-img">
+            <img src="../assets/images/logos/logo.svg" alt="" />
+          </a>
+          <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
+            <i class="ti ti-x fs-8"></i>
+          </div>
+        </div>
+        <!-- Sidebar navigation-->
+        <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
+          <ul id="sidebarnav">
+            <li class="nav-small-cap">
+              <iconify-icon icon="solar:menu-dots-linear" class="nav-small-cap-icon fs-4"></iconify-icon>
+              <span class="hide-menu">Home</span>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="./index.html" aria-expanded="false">
+                <iconify-icon icon="solar:widget-add-line-duotone"></iconify-icon>
+                <span class="hide-menu">Dashboard</span>
+              </a>
+            </li>
+            <li>
+              <span class="sidebar-divider lg"></span>
+            </li>
+          </ul>
+        </nav>
+        <!-- End Sidebar navigation -->
+      </div>
+      <!-- End Sidebar scroll-->
+    </aside>
+    <!--  Sidebar End -->
+    <!--  Main wrapper -->
+    <div class="body-wrapper">
+      <!--  Header Start -->
+      <header class="app-header">
+        <nav class="navbar navbar-expand-lg navbar-light">
+          <ul class="navbar-nav">
+            <li class="nav-item d-block d-xl-none">
+              <a class="nav-link sidebartoggler " id="headerCollapse" href="javascript:void(0)">
+                <i class="ti ti-menu-2"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link " href="javascript:void(0)">
+                <iconify-icon icon="solar:bell-linear" class="fs-6"></iconify-icon>
+                <div class="notification bg-primary rounded-circle"></div>
+              </a>
+            </li>
+          </ul>
+          <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
+            <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
+
+              <li class="nav-item dropdown">
+                <a class="nav-link " href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown"
+                  aria-expanded="false">
+                  <img src="../assets/images/profile/user-1.jpg" alt="" width="35" height="35" class="rounded-circle">
+                </a>
+                <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">
+                  <div class="message-body">
+                    <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
+                      <i class="ti ti-user fs-6"></i>
+                      <p class="mb-0 fs-3">My Profile</p>
+                    </a>
+                    </a>
+                    <a href="./authentication-login.html" class="btn btn-outline-primary mx-3 mt-2 d-block">Logout</a>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </nav>
+      </header>
+      <!--  Header End -->
+      <div class="body-wrapper-inner">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title fw-semibold mb-4">Search</h5>
+                <div class="row">
+                  <div class="col-md-8 mb-3">
+                    <input type="text" class="form-control" id="shopType" name="shopType">
+                    <small class="form-text text-muted">Mobile Shop/ Laptop Repair etc.</small>
+                  </div>
+                  <div class="col-md-4">
+                    <button type="button" class="btn btn-primary w-100 py-2 fs-4 mb-4 rounded-2" id="searchBtn" onclick="searchShops()">Search</button>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="mb-3">
+                    <label for="address" class="form-label">Location</label>
+                    <input type="text" class="form-control" id="address" name="address" disabled>
+                    <small class="form-text text-muted">Select your location in map.</small>
+                  </div>
+                  <form id="locationForm" class="mb-4">
+                    <div class="form-group" hidden>
+                      <label for="latitude">Latitude:</label>
+                      <input type="number" class="form-control" id="latitude" name="latitude" step="any" required>
+                    </div>
+                    <div class="form-group" hidden>
+                      <label for="longitude">Longitude:</label>
+                      <input type="number" class="form-control" id="longitude" name="longitude" step="any" required>
+                    </div>
+                
+                    <div id="map" style="height: 400px; margin-top: 10px;"></div>
+                    <div id="distanceContainer" class="form-group">
+                      <div class="row mb-3">
+                        <label for="distance">Max Distance (km):</label>
+                      </div>
+                      <div class="row mb-3">
+                        <div class="col"><input type="range" class="form-control-range" id="distance" name="distance" min="1" max="300" step="1" value="50"></div>
+                        <div class="col"><span id="distanceValue">50 km</span></div>
+                      </div>
+                    </div>
+                    <div class="form-group form-check mb-3">
+                      <input type="checkbox" class="form-check-input" id="skipDistanceCheck" name="skipDistanceCheck">
+                      <label class="form-check-label" for="skipDistanceCheck">Skip Distance Check</label>
+                    </div>
+                    <div id="ratingsContainer" class="form-group">
+                      <div class="row mb-3">
+                        <label for="rating">Ratings:</label>
+                      </div>
+                      <div class="row mb-3">
+                        <div class="col">
+                          <div class="star-rating">
+                            <input type="radio" id="star5" name="rating" value="5"><label for="star5" title="5 stars">★</label>
+                            <input type="radio" id="star4" name="rating" value="4"><label for="star4" title="4 stars">★</label>
+                            <input type="radio" id="star3" name="rating" value="3"><label for="star3" title="3 stars">★</label>
+                            <input type="radio" id="star2" name="rating" value="2"><label for="star2" title="2 stars">★</label>
+                            <input type="radio" id="star1" name="rating" value="1" checked><label for="star1" title="1 star">★</label>
+                          </div>
+                        </div>
+                        <div class="col">
+                          <span id="ratingValue"></span>
+                        </div>
+                      </div>
+                      <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="skipRatingsCheck" name="skipRatingsCheck">
+                        <label class="form-check-label" for="skipRatingsCheck">Skip Ratings</label>
+                      </div>
+                      <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="skipLimit" name="skipLimit">
+                        <label class="form-check-label" for="skipLimit">Show all results</label>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+                <div class="row">
+                  <div class="col align-self-end">
+                    <label class="form-check-label" for="flexSwitchCheckDefault">Advanced Search</label>
+                    <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title fw-semibold mb-4">Shops</h5>
+                    <div class="row" id="shopCards"></div>
+                </div>
+              </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Other script tags -->
+      <script src="../assets/libs/jquery/dist/jquery.min.js"></script>
+      <script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+      <script src="../assets/js/sidebarmenu.js"></script>
+      <script src="../assets/js/app.min.js"></script>
+      <script src="../assets/libs/simplebar/dist/simplebar.js"></script>
+      <!-- solar icons -->
+      <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
+      <script src="../assets/libs/jquery/dist/jquery.min.js"></script>
+      <!-- <script>
+        fetch("http://localhost:3000/shops")
+          .then(response => response.json())
+          .then(shopNames => {
+            const container = document.getElementById("shopCards");
+            shopNames.forEach(shopName => {
+              const card = document.createElement("div");
+              card.classList.add("col-md-4");
+
+              card.innerHTML = `
+        <div class="card">
+            <img src="../assets/images/products/s4.jpg" class="card-img-top" alt="...">
+            <div class="card-body">
+                <h5 class="card-title">${shopName.name}</h5>
+                <p class="card-text">${shopName.shop_des}</p>
+                <a href="#" class="btn btn-primary" onclick="showShopDetails(${shopName.shop_name})">Details</a>
+            </div>
+        </div>
+`;
+              container.appendChild(card);
+            });
+          })
+          .catch(error => console.error("Error fetching shop data:", error));
+      </script> -->
+ <script>
+  function showShopDetails(shopName) {
+      window.location.href = 'shop.html?shop=' + encodeURIComponent(shopName);
+  }
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', (event) => {
+    const stars = document.querySelectorAll('.star-rating input[type="radio"]');
+    const ratingValue = document.getElementById('ratingValue');
+
+    const defaultRating = document.querySelector('.star-rating input[type="radio"]:checked');
+    if (defaultRating) {
+        ratingValue.textContent = `${defaultRating.value} star(s)`;
+    }
+
+    stars.forEach(star => {
+        star.addEventListener('change', (event) => {
+            ratingValue.textContent = `${event.target.value} star(s)`;
+        });
+    });
+});
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var flexSwitch = document.getElementById('flexSwitchCheckDefault');
+    var locationForm = document.getElementById('locationForm');
+    
+    if (flexSwitch.checked) {
+        locationForm.style.display = 'block';
+    } else {
+        locationForm.style.display = 'none';
+    }
+    
+    flexSwitch.addEventListener('change', function() {
+        if (this.checked) {
+            locationForm.style.display = 'block';
+        } else {
+            locationForm.style.display = 'none';
+        }
+    });
+});
+
+
+  document.getElementById('distance').addEventListener('input', function() {
+      document.getElementById('distanceValue').textContent = this.value + ' km';
+  });
+
+  const ratingStars = document.querySelectorAll('.star-rating input');
+  ratingStars.forEach(star => {
+      star.addEventListener('change', function() {
+          document.getElementById('ratingValue').textContent = `Selected Rating: ${this.value} stars`;
+      });
+  });
+</script>
+<script>
+  let map;
+  let geocoder;
+
+  function initMap() {
+    map = new google.maps.Map(document.getElementById('map'), {
+      zoom: 15
+    });
+    geocoder = new google.maps.Geocoder();
+
+    // Get user's current location
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const pos = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+          map.setCenter(pos);
+          document.getElementById('latitude').value = pos.lat;
+          document.getElementById('longitude').value = pos.lng;
+          geocodeLatLng(geocoder, pos.lat, pos.lng);
+
+          // Add marker to the map at user's location
+          new google.maps.Marker({
+            position: pos,
+            map: map
+          });
+        },
+        () => {
+          handleLocationError(true, map.getCenter());
+        }
+      );
+    } else {
+      // Browser doesn't support Geolocation
+      handleLocationError(false, map.getCenter());
+    }
+
+    // Add event listener to update latitude and longitude input when map is clicked
+    map.addListener('click', function(event) {
+      let lat = event.latLng.lat();
+      let lng = event.latLng.lng();
+      document.getElementById('latitude').value = lat;
+      document.getElementById('longitude').value = lng;
+      geocodeLatLng(geocoder, lat, lng);
+
+      // Add marker to the map at the clicked location
+      new google.maps.Marker({
+        position: event.latLng,
+        map: map
+      });
+    });
+  }
+
+  function geocodeLatLng(geocoder, lat, lng) {
+    const latlng = {
+      lat: parseFloat(lat),
+      lng: parseFloat(lng)
+    };
+    geocoder.geocode({
+      location: latlng
+    }, (results, status) => {
+      if (status === "OK") {
+        if (results[0]) {
+          document.getElementById('address').value = results[0].formatted_address;
+        } else {
+          window.alert("No results found");
+        }
+      } else {
+        window.alert("Geocoder failed due to: " + status);
+      }
+    });
+  }
+
+  function handleLocationError(browserHasGeolocation, pos) {
+    window.alert(
+      browserHasGeolocation
+        ? "Error: The Geolocation service failed."
+        : "Error: Your browser doesn't support geolocation."
+    );
+  }
+
+  initMap();
+</script>
+</body>
+
+</html>

@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GadgetRx</title>
+    <link
+      rel="shortcut icon"
+      type="image/png"
+      href="assets/images/logos/favicon.png"
+    />
+    <link rel="stylesheet" href="assets/css/styles.min.css" />
+    <link
+      rel="stylesheet"
+      href="https://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css"
+    />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/style_panel.css" />
+    <link rel="stylesheet" href="assets/css/style_comment.css" />
+    <link rel="stylesheet" href="assets/css/styles_rating.css" />
+  </head>
+
+  <body>
+    <!--  Body Wrapper -->
+    <div
+      class="page-wrapper"
+      id="main-wrapper"
+      data-layout="vertical"
+      data-navbarbg="skin6"
+      data-sidebartype="full"
+      data-sidebar-position="fixed"
+      data-header-position="fixed"
+    >
+      <!-- Sidebar Start -->
+      <aside class="left-sidebar">
+        <!-- Sidebar scroll-->
+        <div>
+          <div
+            class="brand-logo d-flex align-items-center justify-content-between"
+          >
+            <a href="./index.html" class="text-nowrap logo-img">
+              <img src="assets/images/logos/logo.svg" alt="" />
+            </a>
+            <div
+              class="close-btn d-xl-none d-block sidebartoggler cursor-pointer"
+              id="sidebarCollapse"
+            >
+              <i class="ti ti-x fs-8"></i>
+            </div>
+          </div>
+          <!-- Sidebar navigation-->
+          <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
+            <ul id="sidebarnav">
+              <li class="nav-small-cap">
+                <iconify-icon
+                  icon="solar:menu-dots-linear"
+                  class="nav-small-cap-icon fs-4"
+                ></iconify-icon>
+                <span class="hide-menu">Home</span>
+              </li>
+              <li class="sidebar-item">
+                <a
+                  class="sidebar-link"
+                  href="./index.html"
+                  aria-expanded="false"
+                >
+                  <iconify-icon
+                    icon="solar:widget-add-line-duotone"
+                  ></iconify-icon>
+                  <span class="hide-menu">Dashboard</span>
+                </a>
+              </li>
+              <li>
+                <span class="sidebar-divider lg"></span>
+              </li>
+              <li class="nav-small-cap">
+                <iconify-icon
+                  icon="solar:menu-dots-linear"
+                  class="nav-small-cap-icon fs-4"
+                ></iconify-icon>
+                <span class="hide-menu">UI COMPONENTS</span>
+              </li>
+              <li class="sidebar-item">
+                <a
+                  class="sidebar-link"
+                  href="./ui-buttons.html"
+                  aria-expanded="false"
+                >
+                  <iconify-icon
+                    icon="solar:layers-minimalistic-bold-duotone"
+                  ></iconify-icon>
+                  <span class="hide-menu">Buttons</span>
+                </a>
+              </li>
+              <li class="sidebar-item">
+                <a
+                  class="sidebar-link"
+                  href="./ui-alerts.html"
+                  aria-expanded="false"
+                >
+                  <iconify-icon
+                    icon="solar:danger-circle-line-duotone"
+                  ></iconify-icon>
+                  <span class="hide-menu">Alerts</span>
+                </a>
+              </li>
+              <li class="sidebar-item">
+                <a
+                  class="sidebar-link"
+                  href="./ui-card.html"
+                  aria-expanded="false"
+                >
+                  <iconify-icon
+                    icon="solar:bookmark-square-minimalistic-line-duotone"
+                  ></iconify-icon>
+                  <span class="hide-menu">Card</span>
+                </a>
+              </li>
+              <li class="sidebar-item">
+                <a
+                  class="sidebar-link"
+                  href="./ui-forms.html"
+                  aria-expanded="false"
+                >
+                  <iconify-icon
+                    icon="solar:file-text-line-duotone"
+                  ></iconify-icon>
+                  <span class="hide-menu">Forms</span>
+                </a>
+              </li>
+              <li class="sidebar-item">
+                <a
+                  class="sidebar-link"
+                  href="./ui-typography.html"
+                  aria-expanded="false"
+                >
+                  <iconify-icon
+                    icon="solar:text-field-focus-line-duotone"
+                  ></iconify-icon>
+                  <span class="hide-menu">Typography</span>
+                </a>
+              </li>
+              <li>
+                <span class="sidebar-divider lg"></span>
+              </li>
+              <li class="nav-small-cap">
+                <iconify-icon
+                  icon="solar:menu-dots-linear"
+                  class="nav-small-cap-icon fs-4"
+                ></iconify-icon>
+                <span class="hide-menu">AUTH</span>
+              </li>
+              <li class="sidebar-item">
+                <a
+                  class="sidebar-link"
+                  href="./authentication-login.html"
+                  aria-expanded="false"
+                >
+                  <iconify-icon
+                    icon="solar:login-3-line-duotone"
+                  ></iconify-icon>
+                  <span class="hide-menu">Login</span>
+                </a>
+              </li>
+              <li class="sidebar-item">
+                <a
+                  class="sidebar-link"
+                  href="./authentication-register.html"
+                  aria-expanded="false"
+                >
+                  <iconify-icon
+                    icon="solar:user-plus-rounded-line-duotone"
+                  ></iconify-icon>
+                  <span class="hide-menu">Register</span>
+                </a>
+              </li>
+              <li>
+                <span class="sidebar-divider lg"></span>
+              </li>
+              <li class="nav-small-cap">
+                <iconify-icon
+                  icon="solar:menu-dots-linear"
+                  class="nav-small-cap-icon fs-4"
+                ></iconify-icon>
+                <span class="hide-menu">EXTRA</span>
+              </li>
+              <li class="sidebar-item">
+                <a
+                  class="sidebar-link"
+                  href="./icon-tabler.html"
+                  aria-expanded="false"
+                >
+                  <iconify-icon
+                    icon="solar:sticker-smile-circle-2-line-duotone"
+                  ></iconify-icon>
+                  <span class="hide-menu">Icons</span>
+                </a>
+              </li>
+              <li class="sidebar-item">
+                <a
+                  class="sidebar-link"
+                  href="./sample-page.html"
+                  aria-expanded="false"
+                >
+                  <iconify-icon
+                    icon="solar:planet-3-line-duotone"
+                  ></iconify-icon>
+                  <span class="hide-menu">Sample Page</span>
+                </a>
+              </li>
+            </ul>
+            <div
+              class="unlimited-access d-flex align-items-center hide-menu bg-primary-subtle position-relative mb-7 mt-4 p-3 rounded"
+            >
+              <div class="me-2 flex-shrink-0">
+                <h6 class="fw-semibold fs-4 mb-6 text-dark w-75">
+                  Upgrade to pro
+                </h6>
+                <a
+                  href="https://adminmart.com/product/matdash-bootstrap-5-admin-dashboard-template/"
+                  target="_blank"
+                  class="btn btn-primary fs-2 fw-semibold lh-sm"
+                  >Buy Pro</a
+                >
+              </div>
+              <div class="unlimited-access-img">
+                <img
+                  src="assets/images/backgrounds/rupee.png"
+                  alt=""
+                  class="img-fluid"
+                />
+              </div>
+            </div>
+          </nav>
+        </div>
+      </aside>
+      <div class="body-wrapper">
+        <header class="app-header">
+          <nav class="navbar navbar-expand-lg navbar-light">
+            <ul class="navbar-nav">
+              <li class="nav-item d-block d-xl-none">
+                <a
+                  class="nav-link sidebartoggler"
+                  id="headerCollapse"
+                  href="javascript:void(0)"
+                >
+                  <i class="ti ti-menu-2"></i>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="javascript:void(0)">
+                  <iconify-icon
+                    icon="solar:bell-linear"
+                    class="fs-6"
+                  ></iconify-icon>
+                  <div class="notification bg-primary rounded-circle"></div>
+                </a>
+              </li>
+            </ul>
+            <div
+              class="navbar-collapse justify-content-end px-0"
+              id="navbarNav"
+            >
+              <ul
+                class="navbar-nav flex-row ms-auto align-items-center justify-content-end"
+              >
+                <li class="nav-item dropdown">
+                  <a
+                    class="nav-link"
+                    href="javascript:void(0)"
+                    id="drop2"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                  >
+                    <img
+                      src="assets/images/profile/user-1.jpg"
+                      alt=""
+                      width="35"
+                      height="35"
+                      class="rounded-circle"
+                    />
+                  </a>
+                  <div
+                    class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up"
+                    aria-labelledby="drop2"
+                  >
+                    <div class="message-body">
+                      <a
+                        href="javascript:void(0)"
+                        class="d-flex align-items-center gap-2 dropdown-item"
+                      >
+                        <i class="ti ti-user fs-6"></i>
+                        <p class="mb-0 fs-3">My Profile</p>
+                      </a>
+                      <a
+                        href="javascript:void(0)"
+                        class="d-flex align-items-center gap-2 dropdown-item"
+                      >
+                        <i class="ti ti-mail fs-6"></i>
+                        <p class="mb-0 fs-3">My Account</p>
+                      </a>
+                      <a
+                        href="javascript:void(0)"
+                        class="d-flex align-items-center gap-2 dropdown-item"
+                      >
+                        <i class="ti ti-list-check fs-6"></i>
+                        <p class="mb-0 fs-3">My Task</p>
+                      </a>
+                      <a
+                        href="./authentication-login.html"
+                        class="btn btn-outline-primary mx-3 mt-2 d-block"
+                        >Logout</a
+                      >
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </nav>
+        </header>
+        <!--  Header End -->
+        <div class="body-wrapper-inner">
+          <div class="container-fluid">
+            <div class="card">
+              <div class="card-body">
+                <div class="">
+                  <div class="panel profile-cover">
+                    <div class="profile-cover__img">
+                      <img
+                        src="https://bootdey.com/img/Content/avatar/avatar6.png"
+                        alt
+                      />
+                      <h3 class="h3" id="name">GadgetRX</h3>
+                    </div>
+                    <div
+                      class="profile-cover__action bg--img"
+                      data-overlay="0.3"
+                    >
+                      <button class="btn btn-rounded btn-info">
+                        <i class="fa fa-plus"></i>
+                        <span>Set Appoinment</span>
+                      </button>
+                      <button class="btn btn-rounded btn-info">
+                        <i class="fa fa-comment"></i>
+                        <span>Message</span>
+                      </button>
+                    </div>
+                    <div class="profile-cover__info">
+                      <ul class="nav">
+                        <li><strong id="rates"></strong>Overall Rating</li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="card">
+                      <div class="card-body">
+                        <div
+                          class="d-flex flex-wrap flex-md-column justify-content-md-start align-items-md-start h-100"
+                        >
+                          <!-- Contact Item 1: Phone -->
+                          <div class="col-md-4">
+                            <div class="d-flex align-items-center p-3">
+                              <div
+                                class="bs-icon-md bs-icon-circle bs-icon-primary shadow d-flex flex-shrink-0 justify-content-center align-items-center d-inline-block bs-icon bs-icon-md"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="1em"
+                                  height="1em"
+                                  fill="currentColor"
+                                  viewBox="0 0 16 16"
+                                  class="bi bi-telephone"
+                                >
+                                  <path
+                                    d="M3.654 1.328a.678.678 0 0 0-1.015-.063L1.605 2.3c-.483.484-.661 1.169-.45 1.77a17.568 17.568 0 0 0 4.168 6.608 17.569 17.569 0 0 0 6.608 4.168c.601.211 1.286.033 1.77-.45l1.034-1.034a.678.678 0 0 0-.063-1.015l-2.307-1.794a.678.678 0 0 0-.58-.122l-2.19.547a1.745 1.745 0 0 1-1.657-.459L5.482 8.062a1.745 1.745 0 0 1-.46-1.657l.548-2.19a.678.678 0 0 0-.122-.58L3.654 1.328zM1.884.511a1.745 1.745 0 0 1 2.612.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.678.678 0 0 0 .178.643l2.457 2.457a.678.678 0 0 0 .644.178l2.189-.547a1.745 1.745 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.634 18.634 0 0 1-7.01-4.42 18.634 18.634 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877L1.885.511z"
+                                  ></path>
+                                </svg>
+                              </div>
+                              <div class="px-2">
+                                <h6 class="fw-bold mb-0">Phone</h6>
+                                <p class="text-muted mb-0" id="phone">+94</p>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            <!-- Contact Item 2: Email -->
+                            <div class="d-flex align-items-center p-3">
+                              <div
+                                class="bs-icon-md bs-icon-circle bs-icon-primary shadow d-flex flex-shrink-0 justify-content-center align-items-center d-inline-block bs-icon bs-icon-md"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="1em"
+                                  height="1em"
+                                  fill="currentColor"
+                                  viewBox="0 0 16 16"
+                                  class="bi bi-envelope"
+                                >
+                                  <path
+                                    d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1zm13 2.383-4.708 2.825L15 11.105zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741M1 11.105l4.708-2.897L1 5.383z"
+                                  ></path>
+                                </svg>
+                              </div>
+                              <div class="px-2">
+                                <h6 class="fw-bold mb-0">Email</h6>
+                                <p class="text-muted mb-0" id="email">
+                                  gadgetrx9@gmail.com
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            <!-- Contact Item 3: Location -->
+                            <div class="d-flex align-items-center p-3">
+                              <div
+                                class="bs-icon-md bs-icon-circle bs-icon-primary shadow d-flex flex-shrink-0 justify-content-center align-items-center d-inline-block bs-icon bs-icon-md"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="1em"
+                                  height="1em"
+                                  fill="currentColor"
+                                  viewBox="0 0 16 16"
+                                  class="bi bi-pin"
+                                >
+                                  <path
+                                    d="M4.146.146A.5.5 0 0 1 4.5 0h7a.5.5 0 0 1 .5.5c0 .68-.342 1.174-.646 1.479-.126.125-.25.224-.354.298v4.431l.078.048c.203.127.476.314.751.555C12.36 7.775 13 8.527 13 9.5a.5.5 0 0 1-.5.5h-4v4.5c0 .276-.224 1.5-.5 1.5s-.5-1.224-.5-1.5V10h-4a.5.5 0 0 1-.5-.5c0-.973.64-1.725 1.17-2.189A5.921 5.921 0 0 1 5 6.708V2.277a2.77 2.77 0 0 1-.354-.298C4.342 1.674 4 1.179 4 .5a.5.5 0 0 1 .146-.354zm1.58 1.408-.002-.001.002.001m-.002-.001.002.001A.5.5 0 0 1 6 2v5a.5.5 0 0 1-.276.447h-.002l-.012.007-.054.03a4.922 4.922 0 0 0-.827.58c-.318.278-.585.596-.725.936h7.792c-.14-.34-.407-.658-.725-.936a4.915 4.915 0 0 0-.881-.61l-.012-.006h-.002A.5.5 0 0 1 10 7V2a.5.5 0 0 1 .295-.458 1.775 1.775 0 0 0 .351-.271c.08-.08.155-.17.214-.271H5.14c.06.1.133.191.214.271a1.78 1.78 0 0 0 .37.282"
+                                  ></path>
+                                </svg>
+                              </div>
+                              <div class="px-2">
+                                <h6 class="fw-bold mb-0">Location</h6>
+                                <p class="text-muted mb-0" id="address">
+                                  Kuliyapitiya
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <div class="col-md-5 mb-3">
+                      <section class="container mt-5" hidden>
+                        <div class="form-group">
+                          <label for="person_id">Person ID:</label>
+                          <input
+                            type="text"
+                            class="form-control"
+                            name="person_id"
+                            id="person_id"
+                            value="kav"
+                          />
+                        </div>
+                        <div class="form-group">
+                          <label for="shop_id">Shop ID:</label>
+                          <input
+                            type="text"
+                            class="form-control"
+                            name="shop_id"
+                            id="shop_id"
+                            required
+                          />
+                        </div>
+                      </section>
+                      <form id="review-form">
+                        <div class="card" style="min-width: 260px">
+                          <div class="card-body text-center">
+                            <div class="d-flex flex-column align-items-center">
+                              <span class="myratings">0</span>
+                              <h4 class="mt-1">Rate us</h4>
+                              <div class="star-rating">
+                                <fieldset class="rating">
+                                  <input
+                                    type="radio"
+                                    id="star5"
+                                    name="rating"
+                                    value="5"
+                                    class="star"
+                                  /><label
+                                    class="full"
+                                    for="star5"
+                                    title="Awesome - 5 stars"
+                                  ></label>
+                                  <input
+                                    type="radio"
+                                    id="star4"
+                                    name="rating"
+                                    value="4"
+                                    class="star"
+                                  /><label
+                                    class="full"
+                                    for="star4"
+                                    title="Pretty good - 4 stars"
+                                  ></label>
+                                  <input
+                                    type="radio"
+                                    id="star3"
+                                    name="rating"
+                                    value="3"
+                                    class="star"
+                                  /><label
+                                    class="full"
+                                    for="star3"
+                                    title="Meh - 3 stars"
+                                  ></label>
+                                  <input
+                                    type="radio"
+                                    id="star2"
+                                    name="rating"
+                                    value="2"
+                                    class="star"
+                                  /><label
+                                    class="full"
+                                    for="star2"
+                                    title="Kinda bad - 2 stars"
+                                  ></label>
+                                  <input
+                                    type="radio"
+                                    id="star1"
+                                    name="rating"
+                                    value="1"
+                                    class="star"
+                                  /><label
+                                    class="full"
+                                    for="star1"
+                                    title="Sucks big time - 1 star"
+                                  ></label>
+                                  <input
+                                    type="radio"
+                                    class="reset-option"
+                                    name="rating"
+                                    value="reset"
+                                  />
+                                </fieldset>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </form>
+                    </div>
+                    <div class="col-md-7">
+                      <div class="card">
+                        <div class="card-body">
+                          <div class="flash-comments">
+                            <form class="pure-form" id="comment-form">
+                              <div class="row comment-form">
+                                <div class="col-md-8 mb-3">
+                                  <textarea
+                                    class="form-control"
+                                    placeholder="Enter comment text"
+                                    required
+                                    id="new_comment_text"
+                                    rows="3"
+                                  ></textarea>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                  <button
+                                    type="submit"
+                                    class="btn btn-primary btn-block fixed-size-button"
+                                  >
+                                    Send Comment
+                                  </button>
+                                </div>
+                              </div>
+                            </form>
+                            <div
+                              class="comments-list"
+                              id="comments-list"
+                              style="max-height: 500px"
+                            >
+                              <!-- Comment template -->
+                              <script
+                                id="comment-template"
+                                type="text/x-template"
+                              >
+                                <div class="media" data-comment-id="{{comment_id}}">
+                                  <div class="row">
+                                    <div class="col mb-3">
+                                      <img class="mr-3 user-icon" src="assets/images/profile/user-1.jpg" alt="User Icon">
+                                    </div>
+                                    <div class="col">
+
+                                      <div class=" media-body">
+
+                                        <div class="mb-1"><div class="name">{{name}}</div>
+                                        <div class="text">{{comment}}</div></div></div>
+                                        <div class="">{{#if isOwner}}
+                                          <button class="btn btn-danger btn-sm delete-comment" data-comment-id="{{comment_id}}" style="width: 75px; height: 30px;">Delete</button>
+                                          {{/if}}</div>
+                                  </div>
+                                </div>
+                                  </div>
+
+
+                                </div>
+                              </script>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="card">
+                      <div class="card-body">
+                        <h5 class="card-title fw-semibold mb-4">
+                          Meet our team
+                        </h5>
+                        <div class="row" id="techCards"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="assets/libs/jquery/dist/jquery.min.js"></script>
+    <script src="assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/sidebarmenu.js"></script>
+    <script src="assets/js/app.min.js"></script>
+    <script src="assets/libs/simplebar/dist/simplebar.js"></script>
+    <!-- solar icons -->
+    <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.bundle.min.js"></script>
+    <script
+      type="text/javascript"
+      src="https://js.pusher.com/7.0/pusher.min.js"
+    ></script>
+    <script src="assets/script/script_rating.js" defer></script>
+    <script src="assets/script/script_comment.js"></script>
+    <script src="assets/script/script.js"></script>
+    <script type="text/template" id="comment-template">
+      <div class="comment" data-comment-id="{{comment_id}}">
+        <p><strong>{{name}}</strong>: {{comment}}</p>
+        {{#if isOwner}}
+        <i class="fa fa-trash delete-comment" data-comment-id="{{comment_id}}" style="color: red;" aria-hidden="true"></i>
+        {{/if}}
+      </div>
+    </script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const personId = document.getElementById("person_id").value;
+        const shopId = getQueryParam("shop");
+        console.log(personId, shopId);
+        if (shopId) {
+          document.getElementById("shop_id").value = shopId;
+          fetchTechData(shopId);
+          loadRating(personId, shopId);
+          setShopdata(shopId);
+        }
+      });
+    </script>
+  </body>
+</html>
