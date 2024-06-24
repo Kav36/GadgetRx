@@ -205,6 +205,68 @@ function signup_user() {
     });
 }
 
+function signup_user1() {
+  const name = document.getElementById("name").value;
+  const username = document.getElementById("username").value;
+  const email = document.getElementById("email").value;
+  const contactnum = document.getElementById("contactnum").value;
+  const latitude = document.getElementById("latitude").value;
+  const longitude = document.getElementById("longitude").value;
+  const password = document.getElementById("password").value;
+  const otp = document.getElementById("otp").value;
+
+  if (
+    !name ||
+    !username ||
+    !email ||
+    !contactnum ||
+    !latitude ||
+    !longitude ||
+    !password ||
+    !otp
+  ) {
+    alert("One or more fields are empty!");
+    return;
+  }
+
+  const formData = {
+    name: name,
+    username: username,
+    email: email,
+    contactnum: contactnum,
+    latitude: latitude,
+    longitude: longitude,
+    password: password,
+    otp: otp,
+  };
+
+  fetch("http://localhost:3000/signup_user1", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(formData),
+  })
+    .then((response) => {
+      return response.json().then((data) => {
+        if (!response.ok) {
+          console.error("Server returned an error response:", data);
+          throw new Error(data.message || "Unknown error");
+        }
+        console.log("Successful response:", data);
+        return data;
+      });
+    })
+    .then((data) => {
+      console.log("Showing success alert with message:", data.message);
+      alert(data.message);
+    })
+    .catch((error) => {
+      console.error("Error signing up:", error);
+      alert(error.message || "Error signing up. Please try again later.");
+    });
+}
+
 function forget_pw() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
@@ -497,4 +559,85 @@ function setShopdata(shopId) {
     .catch((error) => console.error("Error fetching overall rating:", error));
 }
 
+function deactivateAccount(user) {
+  event.preventDefault();  // Prevent the default form submission
+
+  const checkbox = document.getElementById("accountActivation");
+  if (!checkbox.checked) {
+    alert("Please confirm your account deactivation.");
+    return false;
+  }
+
+  const username = document.getElementById("username").value;
+
+  if (username === "") {
+    alert("User Name is required to delete a user!");
+    return false;
+  }
+
+  fetch(`http://localhost:3000/deleteUser/${username}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then((response) => response.text())
+    .then((data) => {
+      console.log(data);
+      alert(data);
+      window.location.href = 'http://localhost:3000/';
+    })
+    .catch((error) => console.error("Error deleting user:", error));
+
+  return false;
+}
+function rd_userAcc() {
+  const usernameInput = document.getElementById("username");
+  const username = usernameInput.value.trim(); // Trim whitespace from input
+
+  if (!username) {
+    console.error("Error: Username cannot be empty");
+    return;
+  }
+
+  fetch(`http://localhost:3000/retrieve_userAcc?username=${encodeURIComponent(username)}`)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log("Data retrieved successfully:", data);
+
+      if (Array.isArray(data) && data.length > 0) {
+        const item = data[0];
+        console.log("Item:", item);
+
+        // Assuming 'item' is an object with properties username, name, email, contactnum, longitude, latitude
+        document.getElementById("name").value = item.name || "";
+        document.getElementById("email").value = item.email || "";
+        document.getElementById("contactnum").value = item.contactnum || "";
+        document.getElementById("longitude").value = item.longitude || "";
+        document.getElementById("latitude").value = item.latitude || "";
+      } else {
+        console.error("Error: No data found for username:", username);
+        // Clear fields if no data found
+        document.getElementById("name").value = "";
+        document.getElementById("email").value = "";
+        document.getElementById("contactnum").value = "";
+        document.getElementById("longitude").value = "";
+        document.getElementById("latitude").value = "";
+      }
+    })
+    .catch(error => {
+      console.error("Error retrieving data:", error);
+      // Handle errors gracefully, clear fields
+      document.getElementById("name").value = "";
+      document.getElementById("email").value = "";
+      document.getElementById("contactnum").value = "";
+      document.getElementById("longitude").value = "";
+      document.getElementById("latitude").value = "";
+    });
+}
 

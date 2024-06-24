@@ -41,7 +41,7 @@ connection.connect((err) => {
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "data/uploads/");
+    cb(null, "uploads/");
   },
   filename: (req, file, cb) => {
     cb(
@@ -111,19 +111,28 @@ const pusher = new Pusher({
 });
 
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "html/index.html"));
+  res.sendFile(path.join(__dirname, "index.html"));
 });
 
 app.get("/login", (req, res) => {
-  res.sendFile(path.join(__dirname, "html/signin.html"));
+  res.sendFile(path.join(__dirname, "signin.html"));
 });
 
 app.get("/signup_user.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "html/signup_user.html"));
+  res.sendFile(path.join(__dirname, "signup_user.html"));
 });
 
 const generateOTP = () => Math.floor(1000 + Math.random() * 9000);
 
+app.get("/logout", (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error("Error destroying session:", err);
+    } else {
+      res.redirect("/login");
+    }
+  });
+});
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -149,6 +158,8 @@ app.post("/login", async (req, res) => {
       }
 
       const storedPassword = results[0].password;
+      const username = results[0].username; // Retrieve username from the query results
+
       try {
         const passwordMatch = await bcrypt.compare(password, storedPassword);
 
@@ -159,9 +170,12 @@ app.post("/login", async (req, res) => {
         }
 
         req.session.loggedin = true;
-        req.session.userId = results[0].id; // Store user ID in the session for further use
+        req.session.username = username;
 
-        return res.redirect("html/dashboard_user.html");
+        console.log("Logged in as:", username);
+
+
+        return res.redirect("search_shop.html");
       } catch (bcryptError) {
         console.error("Error comparing passwords:", bcryptError);
         return res.status(500).send("Internal server error");
@@ -169,6 +183,17 @@ app.post("/login", async (req, res) => {
     }
   );
 });
+
+app.get('/getusername', (req, res) => {
+  if (req.session && req.session.username) {
+    const username = req.session.username;
+    res.json({ username: username });
+  } else {
+    res.status(401).json({ error: 'Unauthorized: No username found in session' });
+  }
+});
+
+
 
 app.post("/signup_shop", async (req, res) => {
   const {
@@ -489,6 +514,70 @@ app.post("/signup_user", async (req, res) => {
     if (shopExists) {
       return res.status(400).json({ message: "Email already exists!" });
     }
+
+    const otpVerification = await verifyOTPFromDatabase(email, otp);
+    if (!otpVerification) {
+      return res.status(400).json({ message: "Invalid OTP!" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const query = `
+            INSERT INTO t_user (name, username, email, contactnum, latitude, longitude, password)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+                name = VALUES(name),
+                username = VALUES(username),
+                contactnum = VALUES(contactnum),
+                latitude = VALUES(latitude),
+                longitude = VALUES(longitude),
+                password = VALUES(password)
+        `;
+
+    connection.query(
+      query,
+      [name, username, email, contactnum, latitude, longitude, hashedPassword],
+      (err, results) => {
+        if (err) {
+          console.error("Failed to save user details:", err);
+          return res
+            .status(500)
+            .json({ message: "Failed to save user details" });
+        }
+        return res.status(200).json({ message: "Sign up successful" });
+      }
+    );
+  } catch (error) {
+    console.error("Error during user signup:", error);
+    return res.status(500).json({ message: "Failed to save user details" });
+  }
+});
+
+app.post("/signup_user1", async (req, res) => {
+  const {
+    name,
+    username,
+    email,
+    contactnum,
+    latitude,
+    longitude,
+    password,
+    otp,
+  } = req.body;
+
+  if (
+    !name ||
+    !username ||
+    !email ||
+    !contactnum ||
+    !latitude ||
+    !longitude ||
+    !password ||
+    !otp
+  ) {
+    return res.status(400).json({ message: "One or more fields are empty!" });
+  }
+
+  try {
 
     const otpVerification = await verifyOTPFromDatabase(email, otp);
     if (!otpVerification) {
@@ -1071,5 +1160,96 @@ app.delete('/appointments/:username/:shop_name/:eventDateTime', (req, res) => {
         return;
       }
       res.status(200).json({ message: 'Appointment deleted successfully' });
+    });
+  });
+  app.delete("/deleteUser/:username", (req, res) => {
+    const username = req.params.username;
+  
+    connection.query(
+      "DELETE FROM t_user WHERE username = ?",
+      [username],
+      (err, results) => {
+        if (err) {
+          console.error("Failed to delete user:", err);
+          return res.status(500).send("Failed to delete user!");
+        }
+        if (results.affectedRows === 0) {
+          return res.status(404).send("User not found!");
+        }
+        console.log("User deleted successfully");
+        return res.send("User deleted successfully!");
+      }
+    );
+  });
+
+  app.get("/retrieve_userAcc", (req, res) => {
+    const searchInput = req.query.username;
+    console.log("searchInput:", searchInput);
+    const retrieveQuery = `SELECT * FROM t_user WHERE username = ?`;
+  
+    connection.query(retrieveQuery, [searchInput], (err, results) => {
+      if (err) {
+        console.error("Error retrieving data:", err);
+        res.status(500).json({ error: "Error retrieving data" });
+      } else {
+        console.log("Data retrieved successfully");
+        res.status(200).json(results);
+      }
+    });
+  });
+
+  
+  app.post('/messages', upload.single('attachment'), (req, res) => {
+    const sender = req.body.sender;
+    const receiver = req.body.receiver;
+    const message = req.body.message;
+    const attachment = req.file ? `/uploads/${req.file.filename}` : null;
+  
+    const query = 'INSERT INTO messages (sender, receiver, message, attachment) VALUES (?, ?, ?, ?)';
+    connection.query(query, [sender, receiver, message, attachment], (err, result) => {
+      if (err) throw err;
+      const insertedId = result.insertId;
+      pusher.trigger('chat', 'message', {
+        id: insertedId,
+        sender: sender,
+        receiver: receiver,
+        message: message,
+        attachment: attachment
+      });
+      res.json({ id: insertedId });
+    });
+  });
+  
+  app.get('/messages', (req, res) => {
+    const sender = req.query.sender;
+    const receiver = req.query.receiver;
+  
+    const query = `
+      SELECT * FROM messages 
+      WHERE (sender = ? AND receiver = ?) OR (sender = ? AND receiver = ?)`;
+    connection.query(query, [sender, receiver, receiver, sender], (err, results) => {
+      if (err) throw err;
+      res.json(results);
+    });
+  });
+  
+  app.delete('/messages/:id', (req, res) => {
+    const id = req.params.id;
+    const selectQuery = 'SELECT attachment FROM messages WHERE id = ?';
+    connection.query(selectQuery, [id], (err, results) => {
+      if (err) throw err;
+      if (results.length > 0 && results[0].attachment) {
+        const filePath = path.join(__dirname, results[0].attachment);
+        fs.unlink(filePath, (err) => {
+          if (err) console.error(err);
+        });
+      }
+  
+      const deleteQuery = 'DELETE FROM messages WHERE id = ?';
+      connection.query(deleteQuery, [id], (err) => {
+        if (err) throw err;
+        pusher.trigger('chat', 'delete-message', { id: id });
+        res.send('OK');
+      });
     });
   });

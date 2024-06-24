@@ -1,6 +1,16 @@
+
 (function() {
+    
     Pusher.logToConsole = true;
-  
+    fetch("/getusername")
+    .then((response) => response.json())
+    .then((data) => {
+      console.log(data);
+      document.getElementById("person_id").value = data.username;
+      fetchCommentsForShop();
+    })
+    .catch((error) => console.error("Error fetching username:", error));
+    
     var serverUrl = "http://localhost:3000/",
         pusher = new Pusher('a2f11745d379fc8f0ecd', {
             cluster: 'ap2',
@@ -11,6 +21,7 @@
         commentsList = document.getElementById('comments-list'),
         commentTemplate = document.getElementById('comment-template'),
         shopIdInput = document.getElementById('shop_id');
+        personIdInput = document.getElementById('person_id');
   
     var recentlyAddedComments = new Set();
   
@@ -22,7 +33,7 @@
   
     function fetchCommentsForShop() {
         var shopId = shopIdInput.value;
-        var personId = document.getElementById('person_id').value;
+        var personId = personIdInput.value;
   
         var xhr = new XMLHttpRequest();
         xhr.open("GET", `${serverUrl}comments/${shopId}?person_id=${personId}`, true);
@@ -74,7 +85,7 @@
   
     function addNewComment(event) {
         event.preventDefault();
-        var personId = document.getElementById('person_id').value;
+        var personId = personIdInput.value;
         var shopId = shopIdInput.value;
         var newComment = {
             "person_id": personId,
@@ -108,7 +119,7 @@
     });
   
     function deleteComment(commentId) {
-        var personId = document.getElementById('person_id').value;
+        var personId = personIdInput.value;
   
         var xhr = new XMLHttpRequest();
         xhr.open("POST", serverUrl + "delete-comment", true);

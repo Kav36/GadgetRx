@@ -7,6 +7,7 @@
   <link rel="shortcut icon" type="image/png" href="assets/images/logos/favicon.png" />
   <link rel="stylesheet" href="assets/css/styles.min.css" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css" rel="stylesheet">
+  <script src="assets/script/script.js"></script>
 </head>
 
   <body>
@@ -148,7 +149,7 @@
                     <div class="card-body">
                       <h1>Book an Appointment</h1>
                       <form id="appointmentForm" class="mt-4">
-                        <div class="form-group">
+                        <div class="form-group" hidden>
                           <label for="username">User Name:</label>
                           <input type="text" id="username" class="form-control" required />
                         </div>
@@ -170,11 +171,11 @@
                             <option value="17:00">5:00 PM</option>
                           </select>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group mb-3">
                           <label for="description">Description:</label>
                           <input type="text" id="description" class="form-control" required />
                         </div>
-                        <div class="form-group mb-3">
+                        <div class="form-group mb-3" hidden>
                           <label for="shop_name">Shop ID:</label>
                           <input type="text" id="shop_name" class="form-control" required />
                         </div>
@@ -194,145 +195,216 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
-      $(document).ready(function () {
+         fetch('/getusername')
+      .then(response => response.json())
+      .then(data => {
+console.log(data);
+        document.getElementById('username').value = data.username;
+      })
+      .catch(error => console.error('Error fetching username:', error));
+
         function fetchEventsForShop(shopName) {
-          fetch(`http://localhost:3000/appointments/${shopName}`)
-            .then((response) => {
-              if (!response.ok) {
-                throw new Error(
-                  `Failed to fetch events: ${response.statusText}`
-                );
-              }
-              return response.json();
-            })
-            .then((data) => {
-              if (!Array.isArray(data)) {
-                throw new Error("Response is not an array");
-              }
-              const events = data.map((appointment) => ({
-                title: `${appointment.description} (Shop: ${appointment.shop_name})`,
-                start: moment.utc(appointment.date_time).local().format(),
-                username: appointment.username,
-                shop_name: appointment.shop_name,
-                date_time: appointment.date_time,
-              }));
-              $("#calendar").fullCalendar("removeEvents");
-              $("#calendar").fullCalendar("addEventSource", events);
-            })
-            .catch((error) => {
-              console.error("Error fetching events:", error);
-              alert("Failed to fetch events.");
-            });
+            fetch(`http://localhost:3000/appointments/${shopName}`)
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error(`Failed to fetch events: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    if (!Array.isArray(data)) {
+                        throw new Error("Response is not an array");
+                    }
+                    const events = data.map((appointment) => ({
+                        title: `${appointment.description} (Shop: ${appointment.shop_name})`,
+                        start: moment.utc(appointment.date_time).local().format(),
+                        username: appointment.username,
+                        shop_name: appointment.shop_name,
+                        date_time: appointment.date_time,
+                    }));
+                    $("#calendar").fullCalendar("removeEvents");
+                    $("#calendar").fullCalendar("addEventSource", events);
+                })
+                .catch((error) => {
+                    console.error("Error fetching events:", error);
+                    alert("Failed to fetch events.");
+                });
         }
-
-        // Initial calendar setup
-        $("#calendar").fullCalendar({
-          header: {
-            left: "prev,next today",
-            center: "title",
-            right: "month,agendaWeek,agendaDay",
-          },
-          timezone: "local",
-          events: [], // Initially no events
-          eventRender: function (event, element) {
-            const currentUser = document.getElementById("username").value;
-            const currentShop = document.getElementById("shop_name").value;
-
-            if (
-              event.username === currentUser &&
-              event.shop_name === currentShop
-            ) {
-              element.append(
-                `<button class="btn btn-danger btn-sm delete-btn">Delete</button>`
-              );
+    
+        async function handleDateChange() {
+            const selectedDate = this.value;
+            const timeSelect = document.getElementById("time");
+    
+            try {
+                const response = await fetch(`http://localhost:3000/appointments?date=${selectedDate}`);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch appointments: ${response.statusText}`);
+                }
+                const appointments = await response.json();
+    
+                // Reset time options
+                timeSelect.querySelectorAll("option").forEach((option) => {
+                    option.hidden = false;
+                });
+    
+                appointments.forEach((appointment) => {
+                    const bookedTime = moment(appointment.date_time).format("HH:mm");
+                    const option = timeSelect.querySelector(`option[value="${bookedTime}"]`);
+                    if (option) {
+                        option.hidden = true; // Changed to 'hidden' instead of 'disabled'
+                    }
+                });
+            } catch (error) {
+                console.error("Error fetching appointments:", error);
+                alert("Failed to fetch appointments.");
             }
-          },
-        });
-
-        // Listen for changes in shop_name field
-        $("#shop_name").on("change", function () {
-          const newShopName = $(this).val();
-          fetchEventsForShop(newShopName);
-        });
-
-        // Handle form submission
-        $("#appointmentForm").on("submit", async function (event) {
-          event.preventDefault();
-
-          const username = $("#username").val();
-          const date = $("#date").val();
-          const time = $("#time").val();
-          const description = $("#description").val();
-          const shop_name = $("#shop_name").val();
-
-          const date_time = `${date}T${time}:00`;
-
-          try {
-            const appointmentResponse = await fetch(
-              "http://localhost:3000/appointments",
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  username,
-                  date_time,
-                  description,
-                  shop_name,
-                }),
-              }
-            );
-
-            if (!appointmentResponse.ok) {
-              const errorData = await appointmentResponse.json();
-              throw new Error(
-                `Appointment creation failed: ${errorData.error}`
-              );
+        }
+    
+        $(document).ready(function () {
+            // Initial calendar setup
+            $("#calendar").fullCalendar({
+                header: {
+                    left: "prev,next today",
+                    center: "title",
+                    right: "month,agendaWeek,agendaDay",
+                },
+                timezone: "local",
+                events: [],
+                eventRender: function (event, element) {
+                    const currentUser = document.getElementById("username").value;
+                    const currentShop = document.getElementById("shop_name").value;
+    
+                    if (event.username === currentUser && event.shop_name === currentShop) {
+                        element.append('<button class="btn btn-danger btn-sm delete-btn">Delete</button>');
+                    }
+                },
+            });
+    
+            $("#shop_name").on("change", function () {
+                const newShopName = $(this).val();
+                fetchEventsForShop(newShopName);
+            });
+    
+            // Handle form submission
+            $("#appointmentForm").on("submit", async function (event) {
+                event.preventDefault();
+    
+                const username = $("#username").val();
+                const date = $("#date").val();
+                const time = $("#time").val();
+                const description = $("#description").val();
+                const shop_name = $("#shop_name").val();
+    
+                const date_time = `${date}T${time}:00`;
+    
+                try {
+                    const appointmentResponse = await fetch("http://localhost:3000/appointments", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            username,
+                            date_time,
+                            description,
+                            shop_name,
+                        }),
+                    });
+    
+                    if (!appointmentResponse.ok) {
+                        const errorData = await appointmentResponse.json();
+                        throw new Error(`Appointment creation failed: ${errorData.error}`);
+                    }
+    
+                    alert("Appointment booked successfully!");
+                    fetchEventsForShop(shop_name); // Use shop_name instead of shopId
+                    $("#calendar").fullCalendar("refetchEvents");
+                } catch (error) {
+                    console.error("Error:", error);
+                    alert("Failed to book appointment.");
+                }
+            });
+    
+            // Handle event deletion
+            $("#calendar").on("click", ".delete-btn", async function () {
+                const currentUser = $("#username").val();
+                const currentShop = $("#shop_name").val();
+                const eventDateTime = $(this).closest(".fc-event").data("date");
+    
+                try {
+                    const deleteResponse = await fetch(
+                        `http://localhost:3000/appointments/${currentUser}/${currentShop}/${eventDateTime}`,
+                        {
+                            method: "DELETE",
+                        }
+                    );
+    
+                    if (!deleteResponse.ok) {
+                        throw new Error(`Failed to delete appointment: ${deleteResponse.statusText}`);
+                    }
+    
+                    alert("Appointment deleted successfully!");
+                    fetchEventsForShop(currentShop);
+                    handleDateChange(); // Use currentShop instead of shopId
+                    $("#calendar").fullCalendar("refetchEvents");
+                } catch (error) {
+                    console.error("Error:", error);
+                    alert("Failed to delete appointment.");
+                }
+            });
+    
+            // Fetch events for shop if shop ID is in query param
+            const shopId = new URLSearchParams(window.location.search).get("shop");
+            console.log(shopId);
+            if (shopId) {
+                document.getElementById("shop_name").value = shopId;
+                fetchEventsForShop(shopId);
+                handleDateChange();
             }
-
-            alert("Appointment booked successfully!");
-            $("#calendar").fullCalendar("refetchEvents");
-          } catch (error) {
-            console.error("Error:", error);
-            alert("Failed to book appointment.");
-          }
+    
+            // Attach the handleDateChange function to the date input
+            document.getElementById("date").addEventListener("change", handleDateChange);
         });
-
-        // Handle event deletion
-        $("#calendar").on("click", ".delete-btn", async function () {
-          const currentUser = $("#username").val();
-          const currentShop = $("#shop_name").val();
-          const eventDateTime = $(this).closest(".fc-event").data("date");
-
-          try {
-            const deleteResponse = await fetch(
-              `http://localhost:3000/appointments/${currentUser}/${currentShop}/${eventDateTime}`,
-              {
-                method: "DELETE",
-              }
-            );
-
-            if (!deleteResponse.ok) {
-              throw new Error(
-                `Failed to delete appointment: ${deleteResponse.statusText}`
-              );
-            }
-
-            alert("Appointment deleted successfully!");
-            $("#calendar").fullCalendar("refetchEvents");
-          } catch (error) {
-            console.error("Error:", error);
-            alert("Failed to delete appointment.");
-          }
+    
+        // Set date input to today and disallow past dates
+        document.addEventListener("DOMContentLoaded", function() {
+            var today = new Date();
+            var yyyy = today.getFullYear();
+            var mm = String(today.getMonth() + 1).padStart(2, '0');
+            var dd = String(today.getDate()).padStart(2, '0');
+            var todayFormatted = yyyy + '-' + mm + '-' + dd;
+    
+            var dateInput = document.getElementById('date');
+            dateInput.value = todayFormatted;
+            dateInput.min = todayFormatted; // Set the minimum date to today
         });
-      });
     </script>
-    <script src="assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="assets/js/sidebarmenu.js"></script>
-    <script src="assets/js/app.min.js"></script>
-    <script src="assets/libs/apexcharts/dist/apexcharts.min.js"></script>
-    <script src="assets/libs/simplebar/dist/simplebar.js"></script>
-    <script src="assets/js/dashboard.js"></script>
-    <!-- solar icons -->
-    <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
-  </body>
+    
+
+    
+  <script>
+   document.addEventListener("DOMContentLoaded", function() {
+    var today = new Date();
+    var yyyy = today.getFullYear();
+    var mm = String(today.getMonth() + 1).padStart(2, '0');
+    var dd = String(today.getDate()).padStart(2, '0');
+    var todayFormatted = yyyy + '-' + mm + '-' + dd;
+    
+    var dateInput = document.getElementById('date');
+    dateInput.value = todayFormatted;
+    dateInput.min = todayFormatted; // Set the minimum date to today
+});
+</script>
+<script>
+   function showShopDetails(shopName) {
+      window.location.href = 'chat.html?shop=' + encodeURIComponent(shopName);
+  }
+</script>  
+<script src="assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/sidebarmenu.js"></script>
+  <script src="assets/js/app.min.js"></script>
+  <script src="assets/libs/apexcharts/dist/apexcharts.min.js"></script>
+  <script src="assets/libs/simplebar/dist/simplebar.js"></script>
+  <script src="assets/js/dashboard.js"></script>
+  <!-- solar icons -->
+  <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
+</body>
 </html>

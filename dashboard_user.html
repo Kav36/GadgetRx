@@ -7,6 +7,9 @@
   <title>GadgetRx</title>
   <link rel="shortcut icon" type="image/png" href="../assets/images/logos/favicon.png" />
   <link rel="stylesheet" href="../assets/css/styles.min.css" />
+  <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/css/template.css" rel="stylesheet">
+
 </head>
 
 <body>
@@ -36,81 +39,6 @@
               <a class="sidebar-link" href="./index.html" aria-expanded="false">
                 <iconify-icon icon="solar:widget-add-line-duotone"></iconify-icon>
                 <span class="hide-menu">Dashboard</span>
-              </a>
-            </li>
-            <li>
-              <span class="sidebar-divider lg"></span>
-            </li>
-            <li class="nav-small-cap">
-              <iconify-icon icon="solar:menu-dots-linear" class="nav-small-cap-icon fs-4"></iconify-icon>
-              <span class="hide-menu">UI COMPONENTS</span>
-            </li>
-            <li class="sidebar-item">
-              <a class="sidebar-link" href="./ui-buttons.html" aria-expanded="false">
-                <iconify-icon icon="solar:layers-minimalistic-bold-duotone"></iconify-icon>
-                <span class="hide-menu">Buttons</span>
-              </a>
-            </li>
-            <li class="sidebar-item">
-              <a class="sidebar-link" href="./ui-alerts.html" aria-expanded="false">
-                <iconify-icon icon="solar:danger-circle-line-duotone"></iconify-icon>
-                <span class="hide-menu">Alerts</span>
-              </a>
-            </li>
-            <li class="sidebar-item">
-              <a class="sidebar-link" href="./ui-card.html" aria-expanded="false">
-                <iconify-icon icon="solar:bookmark-square-minimalistic-line-duotone"></iconify-icon>
-                <span class="hide-menu">Card</span>
-              </a>
-            </li>
-            <li class="sidebar-item">
-              <a class="sidebar-link" href="./ui-forms.html" aria-expanded="false">
-                <iconify-icon icon="solar:file-text-line-duotone"></iconify-icon>
-                <span class="hide-menu">Forms</span>
-              </a>
-            </li>
-            <li class="sidebar-item">
-              <a class="sidebar-link" href="./ui-typography.html" aria-expanded="false">
-                <iconify-icon icon="solar:text-field-focus-line-duotone"></iconify-icon>
-                <span class="hide-menu">Typography</span>
-              </a>
-            </li>
-            <li>
-              <span class="sidebar-divider lg"></span>
-            </li>
-            <li class="nav-small-cap">
-              <iconify-icon icon="solar:menu-dots-linear" class="nav-small-cap-icon fs-4"></iconify-icon>
-              <span class="hide-menu">AUTH</span>
-            </li>
-            <li class="sidebar-item">
-              <a class="sidebar-link" href="./authentication-login.html" aria-expanded="false">
-                <iconify-icon icon="solar:login-3-line-duotone"></iconify-icon>
-                <span class="hide-menu">Login</span>
-              </a>
-            </li>
-            <li class="sidebar-item">
-              <a class="sidebar-link" href="./authentication-register.html" aria-expanded="false">
-                <iconify-icon icon="solar:user-plus-rounded-line-duotone"></iconify-icon>
-                <span class="hide-menu">Register</span>
-              </a>
-            </li>
-            <li>
-              <span class="sidebar-divider lg"></span>
-            </li>
-            <li class="nav-small-cap">
-              <iconify-icon icon="solar:menu-dots-linear" class="nav-small-cap-icon fs-4"></iconify-icon>
-              <span class="hide-menu">EXTRA</span>
-            </li>
-            <li class="sidebar-item">
-              <a class="sidebar-link" href="./icon-tabler.html" aria-expanded="false">
-                <iconify-icon icon="solar:sticker-smile-circle-2-line-duotone"></iconify-icon>
-                <span class="hide-menu">Icons</span>
-              </a>
-            </li>
-            <li class="sidebar-item">
-              <a class="sidebar-link" href="./sample-page.html" aria-expanded="false">
-                <iconify-icon icon="solar:planet-3-line-duotone"></iconify-icon>
-                <span class="hide-menu">Sample Page</span>
               </a>
             </li>
           </ul>
@@ -170,15 +98,34 @@
       </header>
       <!--  Header End -->
       <div class="body-wrapper-inner">
-        <div class="container-fluid">
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title fw-semibold mb-4">User</h5>
-                <div class="row" id="shopCards"></div>
+        <div class="">
+          <section class="hero-section d-flex justify-content-center align-items-center text-center text-white" id="">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-8 col-12 mx-auto">
+                      <h1>Expert Repairs. Reliable Service.</h1>
+                      <h6>Your trusted solution for laptop, computer, and mobile phone repairs</h6>
+                        <form method="get" class="custom-form mt-4 pt-2 mb-lg-0 mb-5" role="search">
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bi-search" id="basic-addon1"></span>
+                                <input name="keyword" type="search" class="form-control" id="keyword" placeholder="Laptop, Mobile, Apple, Samsung, IC ..." aria-label="Search">
+                                <button type="submit" class="btn btn-primary">Search</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
+        </section>
+
+     
+
+        <!-- Explore Section -->
+        <section class="explore-section section-padding" id="">
+        
+        </section>
+          
           </div>
         </div>
-      </div>
 
       <!-- Other script tags -->
       <script src="../assets/libs/jquery/dist/jquery.min.js"></script>
