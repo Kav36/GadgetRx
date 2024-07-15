@@ -1,410 +1,346 @@
 <!DOCTYPE html>
 <html lang="en">
- <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>GadgetRx</title>
-  <link rel="shortcut icon" type="image/png" href="assets/images/logos/favicon.png" />
-  <link rel="stylesheet" href="assets/css/styles.min.css" />
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css" rel="stylesheet">
-  <script src="assets/script/script.js"></script>
-</head>
+  <head>
+    <meta charset="utf-8" />
+    <title>GadgetRx</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta content="" name="keywords" />
+    <meta content="" name="description" />
+
+    <!-- Favicon -->
+    <link href="img/favicon.png" rel="icon" />
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;700&family=Ubuntu:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Icon Font Stylesheet -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+
+    <!-- Libraries Stylesheet -->
+    <link href="lib/animate/animate.min.css" rel="stylesheet" />
+    <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet" />
+    <link
+      href="lib/tempusdominus/css/tempusdominus-bootstrap-4.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    />
+    <!-- Customized Bootstrap Stylesheet -->
+    <link href="css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Template Stylesheet -->
+    <link href="css/style.css" rel="stylesheet" />
+  </head>
 
   <body>
-    <!--  Body Wrapper -->
-    <div
-      class="page-wrapper"
-      id="main-wrapper"
-      data-layout="vertical"
-      data-navbarbg="skin6"
-      data-sidebartype="full"
-      data-sidebar-position="fixed"
-      data-header-position="fixed"
+    <!-- Spinner End -->
+
+    <!-- Navbar Start -->
+    <nav
+      class="navbar navbar-expand-lg bg-white navbar-light shadow sticky-top p-0"
     >
-      <!-- Sidebar Start -->
-      <aside class="left-sidebar">
-        <!-- Sidebar scroll-->
-        <div>
-          <div
-            class="brand-logo d-flex align-items-center justify-content-between"
-          >
-            <a href="index.html" class="text-nowrap logo-img">
-              <img src="assets/images/logos/logo.svg" alt="" />
-            </a>
-            <div
-              class="close-btn d-xl-none d-block sidebartoggler cursor-pointer"
-              id="sidebarCollapse"
-            >
-              <i class="ti ti-x fs-8"></i>
-            </div>
-          </div>
-          <!-- Sidebar navigation-->
-          <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
-            <ul id="sidebarnav">
-              <li class="nav-small-cap">
-                <iconify-icon
-                  icon="solar:menu-dots-linear"
-                  class="nav-small-cap-icon fs-4"
-                ></iconify-icon>
-                <span class="hide-menu">Home</span>
-              </li>
-              <li class="sidebar-item">
-                <a
-                  class="sidebar-link"
-                  href="./index.html"
-                  aria-expanded="false"
-                >
-                  <iconify-icon
-                    icon="solar:widget-add-line-duotone"
-                  ></iconify-icon>
-                  <span class="hide-menu">Dashboard</span>
-                </a>
-              </li>
-            </ul>
-          </nav>
-          <!-- End Sidebar navigation -->
+      <a
+        href="index.html"
+        class="navbar-brand d-flex align-items-center px-4 px-lg-5"
+      >
+        <h2 class="text-primary">
+          <img src="img/favicon.png" height="30px" alt="GadgetRx Logo" />
+          GadgetRx
+        </h2>
+      </a>
+      <button
+        type="button"
+        class="navbar-toggler me-4"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarCollapse"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarCollapse">
+        <div class="navbar-nav ms-auto p-4 p-lg-0">
+          <a href="index.html" class="nav-item nav-link">Home</a>
+          <a href="dashboard_user.html" class="nav-item nav-link">Dashboard</a>
+          <a href="search_shop.html" class="nav-item nav-link">Search</a>
+          <a href="setting_user.html" class="nav-item nav-link">Setting</a>
         </div>
-        <!-- End Sidebar scroll-->
-      </aside>
-      <!--  Sidebar End -->
-      <!--  Main wrapper -->
+      </div>
+    </nav>
+    <!-- Navbar End -->
+
+    <!-- Body Wrapper -->
+    <div class="container-xxl py-5 wow fadeInUp" data-wow-delay="0.1s">
       <div class="body-wrapper">
-        <!--  Header Start -->
-        <header class="app-header">
-          <nav class="navbar navbar-expand-lg navbar-light">
-            <ul class="navbar-nav">
-              <li class="nav-item d-block d-xl-none">
-                <a
-                  class="nav-link sidebartoggler"
-                  id="headerCollapse"
-                  href="javascript:void(0)"
-                >
-                  <i class="ti ti-menu-2"></i>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="javascript:void(0)">
-                  <iconify-icon
-                    icon="solar:bell-linear"
-                    class="fs-6"
-                  ></iconify-icon>
-                  <div class="notification bg-primary rounded-circle"></div>
-                </a>
-              </li>
-            </ul>
-            <div
-              class="navbar-collapse justify-content-end px-0"
-              id="navbarNav"
-            >
-              <ul
-                class="navbar-nav flex-row ms-auto align-items-center justify-content-end"
-              >
-                <li class="nav-item dropdown">
-                  <a
-                    class="nav-link"
-                    href="javascript:void(0)"
-                    id="drop2"
-                    data-bs-toggle="dropdown"
-                    aria-expanded="false"
-                  >
-                    <img
-                      src="assets/images/profile/user-1.jpg"
-                      alt=""
-                      width="35"
-                      height="35"
-                      class="rounded-circle"
-                    />
-                  </a>
-                  <div
-                    class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up"
-                    aria-labelledby="drop2"
-                  >
-                    <div class="message-body">
-                      <a
-                        href="javascript:void(0)"
-                        class="d-flex align-items-center gap-2 dropdown-item"
-                      >
-                        <i class="ti ti-user fs-6"></i>
-                        <p class="mb-0 fs-3">My Profile</p>
-                      </a>
-                      <a
-                        href="./authentication-login.html"
-                        class="btn btn-outline-primary mx-3 mt-2 d-block"
-                        >Logout</a
-                      >
-                    </div>
-                  </div>
-                </li>
-              </ul>
-            </div>
-          </nav>
-        </header>
-        <!--  Header End -->
         <div class="body-wrapper-inner">
-            <div class="container-fluid">
-              <!--  Row 1 -->
-              <div class="row">
-                <div class="col d-flex align-items-strech">
-                  <div class="card w-100">
-                    <div class="card-body">
-                      <h1>Book an Appointment</h1>
-                      <form id="appointmentForm" class="mt-4">
-                        <div class="form-group" hidden>
-                          <label for="username">User Name:</label>
-                          <input type="text" id="username" class="form-control" required />
-                        </div>
-                        <div class="form-group">
-                          <label for="date">Date:</label>
-                          <input type="date" id="date" class="form-control" required />
-                        </div>
-                        <div class="form-group">
-                          <label for="time">Time:</label>
-                          <select id="time" class="form-control" required>
-                            <option value="09:00">9:00 AM</option>
-                            <option value="10:00">10:00 AM</option>
-                            <option value="11:00">11:00 AM</option>
-                            <option value="12:00">12:00 PM</option>
-                            <option value="13:00">1:00 PM</option>
-                            <option value="14:00">2:00 PM</option>
-                            <option value="15:00">3:00 PM</option>
-                            <option value="16:00">4:00 PM</option>
-                            <option value="17:00">5:00 PM</option>
-                          </select>
-                        </div>
-                        <div class="form-group mb-3">
-                          <label for="description">Description:</label>
-                          <input type="text" id="description" class="form-control" required />
-                        </div>
-                        <div class="form-group mb-3" hidden>
-                          <label for="shop_name">Shop ID:</label>
-                          <input type="text" id="shop_name" class="form-control" required />
-                        </div>
-                        <button type="submit" class="btn btn-primary mb-3">Book Appointment</button>
-                      </form>
-    
-                      <div id="calendar"></div>
+          <div class="row">
+            <div class="col d-flex align-items-stretch">
+              <div class="card w-100">
+                <div class="card-body">
+                  <h1>Book an Appointment</h1>
+                  <form id="appointmentForm" class="mt-4">
+                    <div class="form-group" hidden>
+                      <label for="username">User Name:</label>
+                      <input
+                        type="text"
+                        id="username"
+                        class="form-control"
+                        required
+                      />
                     </div>
-                  </div>
+                    <div class="form-group">
+                      <label for="date">Date:</label>
+                      <input
+                        type="date"
+                        id="date"
+                        class="form-control"
+                        required
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label for="time">Time:</label>
+                      <select
+                        id="time"
+                        class="form-control"
+                        onchange=""
+                        required
+                      >
+                        <option value="09:00">9:00 AM</option>
+                        <option value="10:00">10:00 AM</option>
+                        <option value="11:00">11:00 AM</option>
+                        <option value="12:00">12:00 PM</option>
+                        <option value="13:00">1:00 PM</option>
+                        <option value="14:00">2:00 PM</option>
+                        <option value="15:00">3:00 PM</option>
+                        <option value="16:00">4:00 PM</option>
+                        <option value="17:00">5:00 PM</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label for="description">Description:</label>
+                      <input
+                        type="text"
+                        id="description"
+                        class="form-control"
+                        required
+                      />
+                    </div>
+                    <div class="form-group mb-3" hidden>
+                      <label for="shop_name">Shop ID:</label>
+                      <input
+                        type="text"
+                        id="shop_name"
+                        class="form-control"
+                        required
+                      />
+                    </div>
+                    <button type="submit" class="btn btn-primary mb-3">
+                      Book Appointment
+                    </button>
+                  </form>
+
+                  <div id="calendar"></div>
                 </div>
               </div>
             </div>
           </div>
-          </div>
+        </div>
+      </div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
-         fetch('/getusername')
-      .then(response => response.json())
-      .then(data => {
-console.log(data);
-        document.getElementById('username').value = data.username;
-      })
-      .catch(error => console.error('Error fetching username:', error));
+      
+      const today = moment().format('YYYY-MM-DD');
+    const maxDate = moment().add(7, 'days').format('YYYY-MM-DD');
+    $("#date").attr("min", today);
+    $("#date").attr("max", maxDate);
 
-        function fetchEventsForShop(shopName) {
-            fetch(`http://localhost:3000/appointments/${shopName}`)
-                .then((response) => {
-                    if (!response.ok) {
-                        throw new Error(`Failed to fetch events: ${response.statusText}`);
-                    }
-                    return response.json();
-                })
-                .then((data) => {
-                    if (!Array.isArray(data)) {
-                        throw new Error("Response is not an array");
-                    }
-                    const events = data.map((appointment) => ({
-                        title: `${appointment.description} (Shop: ${appointment.shop_name})`,
-                        start: moment.utc(appointment.date_time).local().format(),
-                        username: appointment.username,
-                        shop_name: appointment.shop_name,
-                        date_time: appointment.date_time,
-                    }));
-                    $("#calendar").fullCalendar("removeEvents");
-                    $("#calendar").fullCalendar("addEventSource", events);
-                })
-                .catch((error) => {
-                    console.error("Error fetching events:", error);
-                    alert("Failed to fetch events.");
-                });
-        }
-    
-        async function handleDateChange() {
-            const selectedDate = this.value;
-            const timeSelect = document.getElementById("time");
-    
-            try {
-                const response = await fetch(`http://localhost:3000/appointments?date=${selectedDate}`);
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch appointments: ${response.statusText}`);
+                fetch("/getusername")
+                    .then((response) => response.json())
+                    .then((data) => {
+                        document.getElementById("username").value = data.username;
+                    })
+                    .catch((error) => console.error("Error fetching username:", error));
+
+                const receiver = new URLSearchParams(window.location.search).get("shop");
+                if (receiver) {
+                    document.getElementById("shop_name").value = receiver;
+                    fetchEventsForShop(receiver);
                 }
-                const appointments = await response.json();
-    
-                // Reset time options
-                timeSelect.querySelectorAll("option").forEach((option) => {
-                    option.hidden = false;
-                });
-    
-                appointments.forEach((appointment) => {
-                    const bookedTime = moment(appointment.date_time).format("HH:mm");
-                    const option = timeSelect.querySelector(`option[value="${bookedTime}"]`);
-                    if (option) {
-                        option.hidden = true; // Changed to 'hidden' instead of 'disabled'
-                    }
-                });
-            } catch (error) {
-                console.error("Error fetching appointments:", error);
-                alert("Failed to fetch appointments.");
+
+                function fetchEventsForShop(shopName) {
+                    fetch(`http://localhost:3000/appointments/${shopName}`)
+                        .then((response) => {
+                            if (!response.ok) {
+                                throw new Error(`Failed to fetch events: ${response.statusText}`);
+                            }
+                            return response.json();
+                        })
+                        .then((data) => {
+                            if (!Array.isArray(data)) {
+                                throw new Error("Response is not an array");
+                            }
+                            const events = data.map((appointment) => ({
+                                title: `${appointment.description} (Shop: ${appointment.shop_name})`,
+                                start: moment.utc(appointment.date_time).local().format(),
+                                username: appointment.username,
+                                shop_name: appointment.shop_name,
+                                date_time: appointment.date_time,
+                            }));
+                            $("#calendar").fullCalendar("removeEvents");
+                            $("#calendar").fullCalendar("addEventSource", events);
+
+                            updateAvailableTimes(data);
+                        })
+                        .catch((error) => {
+                            console.error("Error fetching events:", error);
+                            alert("Failed to fetch events.");
+                        });
+                }
+
+                function updateAvailableTimes(appointments) {
+    const selectedDate = $("#date").val();
+    const now = moment(); // Current date and time
+    const bookedTimes = appointments
+        .filter(app => moment(app.date_time).format("YYYY-MM-DD") === selectedDate)
+        .map(app => moment(app.date_time).format("HH:mm"));
+
+    let selectedTime = $("#time").val();
+    let newSelectedTime = null;
+
+    // Determine if the selected date is today
+    const isToday = moment(selectedDate).isSame(now, 'day');
+
+    $("#time option").each(function () {
+        const option = $(this);
+        const optionTime = option.val();
+
+        // Hide booked times and past times if the date is today
+        if (bookedTimes.includes(optionTime) || (isToday && moment(optionTime, "HH:mm").isBefore(now))) {
+            option.hide();
+        } else {
+            option.show();
+            if (!newSelectedTime) {
+                newSelectedTime = optionTime; // Select the first available time
             }
         }
-    
-        $(document).ready(function () {
-            // Initial calendar setup
-            $("#calendar").fullCalendar({
-                header: {
-                    left: "prev,next today",
-                    center: "title",
-                    right: "month,agendaWeek,agendaDay",
-                },
-                timezone: "local",
-                events: [],
-                eventRender: function (event, element) {
-                    const currentUser = document.getElementById("username").value;
-                    const currentShop = document.getElementById("shop_name").value;
-    
-                    if (event.username === currentUser && event.shop_name === currentShop) {
-                        element.append('<button class="btn btn-danger btn-sm delete-btn">Delete</button>');
-                    }
-                },
-            });
-    
-            $("#shop_name").on("change", function () {
-                const newShopName = $(this).val();
-                fetchEventsForShop(newShopName);
-            });
-    
-            // Handle form submission
-            $("#appointmentForm").on("submit", async function (event) {
-                event.preventDefault();
-    
-                const username = $("#username").val();
-                const date = $("#date").val();
-                const time = $("#time").val();
-                const description = $("#description").val();
-                const shop_name = $("#shop_name").val();
-    
-                const date_time = `${date}T${time}:00`;
-    
-                try {
-                    const appointmentResponse = await fetch("http://localhost:3000/appointments", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            username,
-                            date_time,
-                            description,
-                            shop_name,
-                        }),
-                    });
-    
-                    if (!appointmentResponse.ok) {
-                        const errorData = await appointmentResponse.json();
-                        throw new Error(`Appointment creation failed: ${errorData.error}`);
-                    }
-    
-                    alert("Appointment booked successfully!");
-                    fetchEventsForShop(shop_name); // Use shop_name instead of shopId
-                    $("#calendar").fullCalendar("refetchEvents");
-                } catch (error) {
-                    console.error("Error:", error);
-                    alert("Failed to book appointment.");
-                }
-            });
-    
-            // Handle event deletion
-            $("#calendar").on("click", ".delete-btn", async function () {
-                const currentUser = $("#username").val();
-                const currentShop = $("#shop_name").val();
-                const eventDateTime = $(this).closest(".fc-event").data("date");
-    
-                try {
-                    const deleteResponse = await fetch(
-                        `http://localhost:3000/appointments/${currentUser}/${currentShop}/${eventDateTime}`,
-                        {
-                            method: "DELETE",
+    });
+
+    // Update selected time if it has changed
+    if (newSelectedTime !== selectedTime) {
+        $("#time").val(newSelectedTime);
+    }
+}
+
+                // Initial calendar setup
+                $("#calendar").fullCalendar({
+                    header: {
+                        left: "prev,next today",
+                        center: "title",
+                        right: "month,agendaWeek,agendaDay",
+                    },
+                    timezone: "local",
+                    events: [],
+                    eventRender: function (event, element) {
+                        const currentUser = document.getElementById("username").value;
+                        const currentShop = document.getElementById("shop_name").value;
+
+                        if (event.username === currentUser && event.shop_name === currentShop) {
+                            element.append(`<button class="btn btn-danger btn-sm delete-btn">Delete</button>`);
                         }
-                    );
-    
-                    if (!deleteResponse.ok) {
-                        throw new Error(`Failed to delete appointment: ${deleteResponse.statusText}`);
-                    }
-    
-                    alert("Appointment deleted successfully!");
-                    fetchEventsForShop(currentShop);
-                    handleDateChange(); // Use currentShop instead of shopId
-                    $("#calendar").fullCalendar("refetchEvents");
-                } catch (error) {
-                    console.error("Error:", error);
-                    alert("Failed to delete appointment.");
-                }
-            });
-    
-            // Fetch events for shop if shop ID is in query param
-            const shopId = new URLSearchParams(window.location.search).get("shop");
-            console.log(shopId);
-            if (shopId) {
-                document.getElementById("shop_name").value = shopId;
-                fetchEventsForShop(shopId);
-                handleDateChange();
-            }
-    
-            // Attach the handleDateChange function to the date input
-            document.getElementById("date").addEventListener("change", handleDateChange);
-        });
-    
-        // Set date input to today and disallow past dates
-        document.addEventListener("DOMContentLoaded", function() {
-            var today = new Date();
-            var yyyy = today.getFullYear();
-            var mm = String(today.getMonth() + 1).padStart(2, '0');
-            var dd = String(today.getDate()).padStart(2, '0');
-            var todayFormatted = yyyy + '-' + mm + '-' + dd;
-    
-            var dateInput = document.getElementById('date');
-            dateInput.value = todayFormatted;
-            dateInput.min = todayFormatted; // Set the minimum date to today
-        });
-    </script>
-    
+                    },
+                });
 
-    
-  <script>
-   document.addEventListener("DOMContentLoaded", function() {
-    var today = new Date();
-    var yyyy = today.getFullYear();
-    var mm = String(today.getMonth() + 1).padStart(2, '0');
-    var dd = String(today.getDate()).padStart(2, '0');
-    var todayFormatted = yyyy + '-' + mm + '-' + dd;
-    
-    var dateInput = document.getElementById('date');
-    dateInput.value = todayFormatted;
-    dateInput.min = todayFormatted; // Set the minimum date to today
-});
-</script>
-<script>
-   function showShopDetails(shopName) {
-      window.location.href = 'chat.html?shop=' + encodeURIComponent(shopName);
-  }
-</script>  
-<script src="assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="assets/js/sidebarmenu.js"></script>
-  <script src="assets/js/app.min.js"></script>
-  <script src="assets/libs/apexcharts/dist/apexcharts.min.js"></script>
-  <script src="assets/libs/simplebar/dist/simplebar.js"></script>
-  <script src="assets/js/dashboard.js"></script>
-  <!-- solar icons -->
-  <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
-</body>
+                // Listen for changes in shop_name field
+                $("#shop_name").on("change", function () {
+                    const newShopName = $(this).val();
+                    fetchEventsForShop(newShopName);
+                });
+
+                // Listen for changes in date field to update available times
+                $("#date").on("change", function () {
+                    const currentShop = $("#shop_name").val();
+                    fetchEventsForShop(document.getElementById("shop_name").value);
+                });
+
+                // Handle form submission
+                $("#appointmentForm").on("submit", async function (event) {
+                    event.preventDefault();
+
+                    const username = $("#username").val();
+                    const date = $("#date").val();
+                    const time = $("#time").val();
+                    const description = $("#description").val();
+                    const shop_name = $("#shop_name").val();
+
+                    const date_time = `${date}T${time}:00`;
+
+                    try {
+                        const appointmentResponse = await fetch("http://localhost:3000/appointments", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                username,
+                                date_time,
+                                description,
+                                shop_name,
+                            }),
+                        });
+
+                        if (!appointmentResponse.ok) {
+                            const errorData = await appointmentResponse.json();
+                            throw new Error(`Appointment creation failed: ${errorData.error}`);
+                        }
+
+                        alert("Appointment booked successfully!");
+                        $("#calendar").fullCalendar("refetchEvents");
+                    } catch (error) {
+                        console.error("Error:", error);
+                        alert("Failed to book appointment.");
+                    }
+                });
+
+                // Handle event deletion
+                $("#calendar").on("click", ".delete-btn", async function () {
+                    const currentUser = $("#username").val();
+                    const currentShop = $("#shop_name").val();
+                    const eventDateTime = $(this).closest(".fc-event").data("date");
+
+                    try {
+                        const deleteResponse = await fetch(`http://localhost:3000/appointments/${currentUser}/${currentShop}/${eventDateTime}`, {
+                            method: "DELETE",
+                        });
+
+                        if (!deleteResponse.ok) {
+                            throw new Error(`Failed to delete appointment: ${deleteResponse.statusText}`);
+                        }
+
+                        alert("Appointment deleted successfully!");
+                        $("#calendar").fullCalendar("refetchEvents");
+                    } catch (error) {
+                        console.error("Error:", error);
+                        alert("Failed to delete appointment.");
+                    }
+                });
+    </script>
+  </body>
 </html>

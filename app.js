@@ -122,6 +122,8 @@ app.get("/signup_user.html", (req, res) => {
   res.sendFile(path.join(__dirname, "signup_user.html"));
 });
 
+
+
 const generateOTP = () => Math.floor(1000 + Math.random() * 9000);
 
 app.get("/logout", (req, res) => {
@@ -143,7 +145,7 @@ app.post("/login", async (req, res) => {
   }
 
   connection.query(
-    "SELECT * FROM t_user WHERE email = ?",
+    "SELECT username, password FROM t_user WHERE email = ?",
     [email],
     async (error, results) => {
       if (error) {
@@ -152,86 +154,283 @@ app.post("/login", async (req, res) => {
       }
 
       if (results.length === 0) {
-        return res.send(
-          '<script>alert("User not found!"); window.location.href="/login";</script>'
+        connection.query(
+          "SELECT shop_name AS username, password FROM t_shop WHERE shop_email = ?",
+          [email],
+          async (error, results) => {
+            if (error) {
+              console.error("Error executing MySQL query:", error);
+              return res.status(500).send("Internal server error");
+            }
+
+            if (results.length === 0) {
+              return res.send(
+                '<script>alert("User not found!"); window.location.href="/login";</script>'
+              );
+            } else {
+              const storedPassword = results[0].password;
+              const username = results[0].username;
+
+              try {
+                const passwordMatch = await bcrypt.compare(password, storedPassword);
+
+                if (!passwordMatch) {
+                  return res.send(
+                    '<script>alert("Incorrect email or password!"); window.location.href="/login";</script>'
+                  );
+                }
+
+                req.session.loggedin = true;
+                req.session.username = username;
+
+                console.log("Logged in as:", username);
+
+                return res.redirect("dashboard_shop.html");
+              } catch (bcryptError) {
+                console.error("Error comparing passwords:", bcryptError);
+                return res.status(500).send("Internal server error");
+              }
+            }
+          }
         );
-      }
+      } else {
+        const storedPassword = results[0].password;
+        const username = results[0].username;
 
-      const storedPassword = results[0].password;
-      const username = results[0].username; // Retrieve username from the query results
+        try {
+          const passwordMatch = await bcrypt.compare(password, storedPassword);
 
-      try {
-        const passwordMatch = await bcrypt.compare(password, storedPassword);
+          if (!passwordMatch) {
+            return res.send(
+              '<script>alert("Incorrect email or password!"); window.location.href="/login";</script>'
+            );
+          }
 
-        if (!passwordMatch) {
-          return res.send(
-            '<script>alert("Incorrect email or password!"); window.location.href="/login";</script>'
-          );
+          req.session.loggedin = true;
+          req.session.username = username;
+
+          console.log("Logged in as:", username);
+
+          return res.redirect("dashboard_user.html");
+        } catch (bcryptError) {
+          console.error("Error comparing passwords:", bcryptError);
+          return res.status(500).send("Internal server error");
         }
-
-        req.session.loggedin = true;
-        req.session.username = username;
-
-        console.log("Logged in as:", username);
-
-
-        return res.redirect("search_shop.html");
-      } catch (bcryptError) {
-        console.error("Error comparing passwords:", bcryptError);
-        return res.status(500).send("Internal server error");
       }
     }
   );
 });
 
-app.get('/getusername', (req, res) => {
+
+app.get("/getusername", (req, res) => {
   if (req.session && req.session.username) {
     const username = req.session.username;
     res.json({ username: username });
   } else {
-    res.status(401).json({ error: 'Unauthorized: No username found in session' });
+    res
+      .status(401)
+      .json({ error: "Unauthorized: No username found in session" });
   }
 });
 
-
-
-app.post("/signup_shop", async (req, res) => {
+app.post("/signup_shop", upload.single('profilePicture'), async (req, res) => {
   const {
-    owner_username,
-    shop_name,
-    name,
-    shop_email,
-    contactnum,
-    shop_type,
-    shop_des,
-    latitude,
-    longitude,
-    password,
-    otp,
+      owner_username,
+      shop_name,
+      name,
+      shop_email,
+      contactnum,
+      shop_type,
+      shop_des,
+      latitude,
+      longitude,
+      password,
   } = req.body;
 
   if (
-    !owner_username ||
-    !shop_name ||
-    !name ||
-    !shop_email ||
-    !contactnum ||
-    !shop_type ||
-    !shop_des ||
-    !latitude ||
-    !longitude ||
-    !password ||
-    !otp
+      !owner_username || !shop_name || !name || !shop_email || !contactnum ||
+      !shop_type || !shop_des || !latitude || !longitude || !password
   ) {
+      return res.status(400).json({ message: "One or more fields are empty!" });
+  }
+
+  try {
+    const shopExists = await checkUserExistsByname_user(shop_email);
+    const userExists1 = await checkUserExistsByname_shop(shop_email);
+    if (shopExists||userExists1) {
+      return res.status(400).json({ message: "Email already exists!" });
+    }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const profilePicPath = req.file ? req.file.path : null; 
+      console.log("Profile pic path:", profilePicPath);
+
+      const query = `
+        INSERT INTO t_shop (owner_username, shop_name, name, shop_email, contactnum, shop_type, shop_des, latitude, longitude, password, profilePic)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+          owner_username = VALUES(owner_username),
+          shop_name = VALUES(shop_name),
+          name = VALUES(name),
+          shop_email = VALUES(shop_email),
+          contactnum = VALUES(contactnum),
+          shop_type = VALUES(shop_type),
+          shop_des = VALUES(shop_des),
+          latitude = VALUES(latitude),
+          longitude = VALUES(longitude),
+          password = VALUES(password),
+          profilePic = COALESCE(VALUES(profilePic), profilePic)
+      `;
+
+      connection.query(
+          query,
+          [owner_username, shop_name, name, shop_email, contactnum, shop_type, shop_des, latitude, longitude, hashedPassword, profilePicPath],
+          (err, results) => {
+              if (err) {
+                  console.error("Failed to save shop details:", err);
+                  return res.status(500).json({ message: "Failed to save shop details" });
+              }
+              return res.status(200).json({ message: "Sign up successful!" });
+          }
+      );
+  } catch (error) {
+      console.error("Error during shop signup:", error);
+      return res.status(500).json({ message: "Failed to save shop details" });
+  }
+});
+app.post("/signup_shop1", upload.single('profilePicture'), async (req, res) => {
+  const {
+      owner_username,
+      shop_name,
+      name,
+      shop_email,
+      contactnum,
+      shop_type,
+      shop_des,
+      latitude,
+      longitude,
+      password,
+  } = req.body;
+
+  if (
+      !owner_username || !shop_name || !name || !shop_email || !contactnum ||
+      !shop_type || !shop_des || !latitude || !longitude || !password
+  ) {
+      return res.status(400).json({ message: "One or more fields are empty!" });
+  }
+
+  try {
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const profilePicPath = req.file ? req.file.path : null; 
+
+      const query = `
+        INSERT INTO t_shop (owner_username, shop_name, name, shop_email, contactnum, shop_type, shop_des, latitude, longitude, password, profilePic)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+          owner_username = VALUES(owner_username),
+          shop_name = VALUES(shop_name),
+          name = VALUES(name),
+          shop_email = VALUES(shop_email),
+          contactnum = VALUES(contactnum),
+          shop_type = VALUES(shop_type),
+          shop_des = VALUES(shop_des),
+          latitude = VALUES(latitude),
+          longitude = VALUES(longitude),
+          password = VALUES(password),
+          profilePic = COALESCE(VALUES(profilePic), profilePic)
+      `;
+
+      connection.query(
+          query,
+          [owner_username, shop_name, name, shop_email, contactnum, shop_type, shop_des, latitude, longitude, hashedPassword, profilePicPath],
+          (err, results) => {
+              if (err) {
+                  console.error("Failed to save shop details:", err);
+                  return res.status(500).json({ message: "Failed to save shop details" });
+              }
+              return res.status(200).json({ message: "Sign up successful!" });
+          }
+      );
+  } catch (error) {
+      console.error("Error during shop signup:", error);
+      return res.status(500).json({ message: "Failed to save shop details" });
+  }
+});
+app.post("/signup_shop2", upload.single('profilePicture'), async (req, res) => {
+  const {
+      shop_name,
+      shop_email
+  } = req.body;
+
+
+  try {
+
+      const query = `
+        INSERT INTO t_shop (shop_name,shop_email)
+        VALUES (?, ?)
+        ON DUPLICATE KEY UPDATE
+          shop_email = VALUES(shop_email)
+      `;
+
+      connection.query(
+          query,
+          [shop_name, shop_email],
+          (err, results) => {
+              if (err) {
+                  console.error("Failed to save shop details:", err);
+                  return res.status(500).json({ message: "Failed to save shop details" });
+              }
+              return res.status(200).json({ message: "Sign up successful!" });
+          }
+      );
+  } catch (error) {
+      console.error("Error during shop signup:", error);
+      return res.status(500).json({ message: "Failed to save shop details" });
+  }
+});
+
+app.get("/shop_details", async (req, res) => {
+  const { shop_name } = req.query;
+
+  if (!shop_name) {
+    return res.status(400).json({ message: "Shop name is required" });
+  }
+
+  try {
+    const query = `
+      SELECT owner_username, shop_name, name, shop_email, contactnum, shop_type, shop_des, latitude, longitude, profilePic
+      FROM t_shop
+      WHERE shop_name = ?
+    `;
+
+    connection.query(query, [shop_name], (err, results) => {
+      if (err) {
+        console.error("Failed to fetch shop details:", err);
+        return res.status(500).json({ message: "Failed to fetch shop details" });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({ message: "Shop not found" });
+      }
+
+      return res.status(200).json(results[0]);
+    });
+  } catch (error) {
+    console.error("Error fetching shop details:", error);
+    return res.status(500).json({ message: "Failed to fetch shop details" });
+  }
+});
+
+app.post("/verify_shop", async (req, res) => {
+  const { shop_email, otp } = req.body;
+
+  if (!otp) {
     return res.status(400).json({ message: "One or more fields are empty!" });
   }
 
   try {
     const otpVerification = await verifyOTPFromDatabase(shop_email, otp);
-    if (!otpVerification) {
-      return res.status(400).json({ message: "Invalid OTP!" });
-    }
-
     const shopExists = await checkUserExistsByEmail_shop(shop_email);
     if (shopExists) {
       return res.status(400).json({ message: "Email already exists!" });
@@ -239,33 +438,16 @@ app.post("/signup_shop", async (req, res) => {
 
     const userExists1 = await checkUserExists_person(shop_email);
     if (userExists1) {
-      return res.status(400).json({ message: "Already used email!" });
+      return res.status(400).json({ message: "Email already exists!" });
     }
-    const hashedPassword = await bcrypt.hash(password, 10);
-    connection.query(
-      "INSERT INTO t_shop (owner_username, shop_name, name, shop_email, contactnum, shop_type, shop_des, latitude, longitude, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE owner_username = VALUES(owner_username), shop_name = VALUES(shop_name), name = VALUES(name), shop_email = VALUES(shop_email), contactnum = VALUES(contactnum), shop_type = VALUES(shop_type), shop_des = VALUES(shop_des), latitude = VALUES(latitude), longitude = VALUES(longitude), password = VALUES(password);",
-      [
-        owner_username,
-        shop_name,
-        name,
-        shop_email,
-        contactnum,
-        shop_type,
-        shop_des,
-        latitude,
-        longitude,
-        hashedPassword,
-      ],
-      (err) => {
-        if (err) {
-          console.error("Failed to save shop details:", err);
-          return res
-            .status(400)
-            .json({ message: "Failed to save shop details" });
-        }
-        return res.status(400).json({ message: "Sign up successful" });
-      }
-    );
+
+    if (!otpVerification) {
+      return res.status(400).json({ message: "Invalid OTP!" });
+    } else {
+      return res
+        .status(200)
+        .json({ message: "OTP Verification successfully!" });
+    }
   } catch (error) {
     console.error("Error during signup:", error);
     return res.status(400).json({ message: "Failed to save shop details" });
@@ -303,7 +485,6 @@ const checkUserExistsByEmail_person = (email) => {
   });
 };
 
-
 const checkUserExistsByUserName_person = (email) => {
   return new Promise((resolve, reject) => {
     connection.query(
@@ -340,6 +521,38 @@ const checkUserExistsByEmail_shop = (email) => {
   return new Promise((resolve, reject) => {
     connection.query(
       "SELECT shop_email FROM t_shop WHERE shop_email = ?",
+      [email],
+      (err, results) => {
+        if (err) {
+          return reject(err);
+        }
+
+        resolve(results.length > 0);
+      }
+    );
+  });
+};
+
+const checkUserExistsByname_user = (email) => {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      "SELECT username FROM t_user WHERE email = ?",
+      [email],
+      (err, results) => {
+        if (err) {
+          return reject(err);
+        }
+
+        resolve(results.length > 0);
+      }
+    );
+  });
+};
+
+const checkUserExistsByname_shop = (email) => {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      "SELECT shop_name FROM t_shop WHERE shop_email = ?",
       [email],
       (err, results) => {
         if (err) {
@@ -479,28 +692,160 @@ app.post("/signup_technician", async (req, res) => {
   }
 });
 
-app.post("/signup_user", async (req, res) => {
-  const {
-    name,
-    username,
-    email,
-    contactnum,
-    latitude,
-    longitude,
-    password,
-    otp,
-  } = req.body;
+app.get("/user_details", async (req, res) => {
+  const { username } = req.query;
 
-  if (
-    !name ||
-    !username ||
-    !email ||
-    !contactnum ||
-    !latitude ||
-    !longitude ||
-    !password ||
-    !otp
-  ) {
+  if (!username) {
+    return res.status(400).json({ message: "Username is required" });
+  }
+
+  try {
+    const query = `
+      SELECT name, username, email, contactnum, latitude, longitude, profilePic
+      FROM t_user
+      WHERE username = ?
+    `;
+
+    connection.query(query, [username], (err, results) => {
+      if (err) {
+        console.error("Failed to fetch user details:", err);
+        return res.status(500).json({ message: "Failed to fetch user details" });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      return res.status(200).json(results[0]);
+    });
+  } catch (error) {
+    console.error("Error fetching user details:", error);
+    return res.status(500).json({ message: "Failed to fetch user details" });
+  }
+});
+
+
+app.post('/signup_user', upload.single("profilePic"), async (req, res) => {
+  const { name, username, email, contactnum, latitude, longitude, password } = req.body;
+
+  if (!name || !username || !email || !contactnum || !latitude || !longitude || !password) {
+    return res.status(400).json({ message: "One or more fields are empty!" });
+  }
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const profilePicPath = req.file ? req.file.path : null; 
+    console.log("Profile pic path:", profilePicPath);
+
+    const shopExists = await checkUserExistsByname_user(shop_email);
+    const userExists1 = await checkUserExistsByname_shop(shop_email);
+    if (shopExists||userExists1) {
+      return res.status(400).json({ message: "Email already exists!" });
+    }
+    
+    const query = `
+      INSERT INTO t_user (name, username, email, contactnum, latitude, longitude, password, profilePic)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      ON DUPLICATE KEY UPDATE
+        name = VALUES(name),
+        email = VALUES(email),
+        contactnum = VALUES(contactnum),
+        latitude = VALUES(latitude),
+        longitude = VALUES(longitude),
+        password = VALUES(password),
+        profilePic = COALESCE(VALUES(profilePic), profilePic)
+    `;
+
+    connection.query(
+      query,
+      [name, username, email, contactnum, latitude, longitude, hashedPassword, profilePicPath],
+      (err, results) => {
+        if (err) {
+          console.error("Failed to save user details:", err);
+          return res.status(500).json({ message: "Failed to save user details" });
+        }
+        return res.status(200).json({ message: "Sign up successful!" });
+      }
+    );
+  } catch (error) {
+    console.error("Error during user signup:", error);
+    return res.status(500).json({ message: "Failed to save user details" });
+  }
+});
+
+app.post('/signup_user1', upload.single("profilePic"), async (req, res) => {
+  const { name, username, email, contactnum, latitude, longitude, password } = req.body;
+
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const profilePicPath = req.file ? req.file.path : null; 
+    
+    const query = `
+      INSERT INTO t_user (name, username, email, contactnum, latitude, longitude, password, profilePic)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      ON DUPLICATE KEY UPDATE
+        name = VALUES(name),
+        email = VALUES(email),
+        contactnum = VALUES(contactnum),
+        latitude = VALUES(latitude),
+        longitude = VALUES(longitude),
+        password = VALUES(password),
+        profilePic = COALESCE(VALUES(profilePic), profilePic)
+    `;
+
+    connection.query(
+      query,
+      [name, username, email, contactnum, latitude, longitude, hashedPassword, profilePicPath],
+      (err, results) => {
+        if (err) {
+          console.error("Failed to save user details:", err);
+          return res.status(500).json({ message: "Failed to save user details" });
+        }
+        return res.status(200).json({ message: "Sign up successful!" });
+      }
+    );
+  } catch (error) {
+    console.error("Error during user signup:", error);
+    return res.status(500).json({ message: "Failed to save user details" });
+  }
+});
+
+app.post('/signup_user2', upload.single("profilePic"), async (req, res) => {
+  const { username, email,} = req.body;
+
+
+  try {
+    const profilePicPath = req.file ? req.file.path : null; 
+    
+    const query = `
+      INSERT INTO t_user (username, email)
+      VALUES (?, ?)
+      ON DUPLICATE KEY UPDATE
+        email = VALUES(email)
+    `;
+
+    connection.query(
+      query,
+      [username, email],
+      (err, results) => {
+        if (err) {
+          console.error("Failed to save user details:", err);
+          return res.status(500).json({ message: "Failed to save user details" });
+        }
+        return res.status(200).json({ message: "Sign up successful!" });
+      }
+    );
+  } catch (error) {
+    console.error("Error during user signup:", error);
+    return res.status(500).json({ message: "Failed to save user details" });
+  }
+});
+
+app.post("/verify_user", async (req, res) => {
+  const { email, otp } = req.body;
+
+  if (!email || !otp) {
     return res.status(400).json({ message: "One or more fields are empty!" });
   }
 
@@ -518,104 +863,16 @@ app.post("/signup_user", async (req, res) => {
     const otpVerification = await verifyOTPFromDatabase(email, otp);
     if (!otpVerification) {
       return res.status(400).json({ message: "Invalid OTP!" });
+    } else {
+      return res
+        .status(200)
+        .json({ message: "OTP Verification successfully!" });
     }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const query = `
-            INSERT INTO t_user (name, username, email, contactnum, latitude, longitude, password)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE
-                name = VALUES(name),
-                username = VALUES(username),
-                contactnum = VALUES(contactnum),
-                latitude = VALUES(latitude),
-                longitude = VALUES(longitude),
-                password = VALUES(password)
-        `;
-
-    connection.query(
-      query,
-      [name, username, email, contactnum, latitude, longitude, hashedPassword],
-      (err, results) => {
-        if (err) {
-          console.error("Failed to save user details:", err);
-          return res
-            .status(500)
-            .json({ message: "Failed to save user details" });
-        }
-        return res.status(200).json({ message: "Sign up successful" });
-      }
-    );
   } catch (error) {
     console.error("Error during user signup:", error);
     return res.status(500).json({ message: "Failed to save user details" });
   }
 });
-
-app.post("/signup_user1", async (req, res) => {
-  const {
-    name,
-    username,
-    email,
-    contactnum,
-    latitude,
-    longitude,
-    password,
-    otp,
-  } = req.body;
-
-  if (
-    !name ||
-    !username ||
-    !email ||
-    !contactnum ||
-    !latitude ||
-    !longitude ||
-    !password ||
-    !otp
-  ) {
-    return res.status(400).json({ message: "One or more fields are empty!" });
-  }
-
-  try {
-
-    const otpVerification = await verifyOTPFromDatabase(email, otp);
-    if (!otpVerification) {
-      return res.status(400).json({ message: "Invalid OTP!" });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const query = `
-            INSERT INTO t_user (name, username, email, contactnum, latitude, longitude, password)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE
-                name = VALUES(name),
-                username = VALUES(username),
-                contactnum = VALUES(contactnum),
-                latitude = VALUES(latitude),
-                longitude = VALUES(longitude),
-                password = VALUES(password)
-        `;
-
-    connection.query(
-      query,
-      [name, username, email, contactnum, latitude, longitude, hashedPassword],
-      (err, results) => {
-        if (err) {
-          console.error("Failed to save user details:", err);
-          return res
-            .status(500)
-            .json({ message: "Failed to save user details" });
-        }
-        return res.status(200).json({ message: "Sign up successful" });
-      }
-    );
-  } catch (error) {
-    console.error("Error during user signup:", error);
-    return res.status(500).json({ message: "Failed to save user details" });
-  }
-});
-
 app.post("/sendOTP_user", async (req, res) => {
   const { email } = req.body;
 
@@ -797,10 +1054,22 @@ app.get("/shops", (req, res) => {
   });
 });
 
-// Route to load rating based on person ID and shop ID
+app.get("/get_profilePic", (req, res) => {
+  const username = req.query.username;
+  const query = "SELECT profilePic FROM t_user WHERE username = ?";
+
+  connection.query(query, [username], (err, results) => {
+    if (err) {
+      console.error("Error executing MySQL query: " + err.stack);
+      return res.status(500).send("Internal Server Error");
+    }
+    res.json(results);
+  });
+});
+
+
 app.get("/load_rating", (req, res) => {
   const { person_id, shop_id } = req.query;
-
   const sql = "SELECT stars FROM reviews WHERE person_id = ? AND shop_id = ?";
   connection.query(sql, [person_id, shop_id], (err, result) => {
     if (err) {
@@ -818,7 +1087,7 @@ app.get("/load_rating", (req, res) => {
 // Route to save rating based on person ID and shop ID
 app.post("/save_rating", (req, res) => {
   const { person_id, shop_id, stars } = req.body;
-
+console.log(person_id, shop_id, stars);
   const sql =
     "INSERT INTO reviews (person_id, shop_id, stars) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE stars = ?";
   connection.query(sql, [person_id, shop_id, stars, stars], (err, result) => {
@@ -927,7 +1196,7 @@ app.get("/comments/:shop_id", (req, res) => {
   }
 
   const query =
-    "SELECT id, person_id, comment, created_at FROM comments WHERE shop_id = ? ORDER BY created_at DESC";
+    "SELECT c.id, c.person_id, c.comment, c.created_at, u.profilePic FROM comments c JOIN t_user u ON c.person_id = u.username WHERE c.shop_id = ? ORDER BY c.created_at DESC";
   connection.query(query, [shopId], (error, results) => {
     if (error) {
       console.error("Error fetching comments:", error);
@@ -969,7 +1238,7 @@ app.post("/delete-comment", (req, res) => {
 app.get("/tech", (req, res) => {
   const shopId = req.query.shop_id;
   const query = `
-        SELECT t_user.name, t_technician.tech_des, t_technician.tech_qul  
+        SELECT t_user.name, t_technician.tech_des, t_technician.tech_qul ,t_user.profilePic 
         FROM t_technician 
         JOIN t_user ON t_technician.tech_username = t_user.username 
         WHERE t_technician.shop_username = ?
@@ -991,8 +1260,10 @@ const haversine = (lat1, lon1, lat2, lon2) => {
   const dLon = toRad(lon2 - lon1);
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    Math.cos(toRad(lat1)) *
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 };
@@ -1013,7 +1284,8 @@ app.get("/nearest-shops", async (req, res) => {
   const skipRatings = skipRatingsCheck === "true";
   const limit = skipLimit === "true" ? null : 10;
 
-  const query = "SELECT * FROM t_shop WHERE shop_type LIKE ? OR shop_des LIKE ? OR shop_name LIKE ?";
+  const query =
+    "SELECT * FROM t_shop WHERE shop_type LIKE ? OR shop_des LIKE ? OR shop_name LIKE ?";
   const params = [`%${shopType}%`, `%${shopType}%`, `%${shopType}%`];
   connection.query(query, params, (err, results) => {
     if (err) {
@@ -1033,10 +1305,14 @@ app.get("/nearest-shops", async (req, res) => {
     });
 
     if (!skipDistance) {
-      shopsWithDistance = shopsWithDistance.filter(shop => shop.distance <= distance);
+      shopsWithDistance = shopsWithDistance.filter(
+        (shop) => shop.distance <= distance
+      );
     }
     if (!skipRatings) {
-      shopsWithDistance = shopsWithDistance.filter(shop => shop.overall_rating >= rating);
+      shopsWithDistance = shopsWithDistance.filter(
+        (shop) => shop.overall_rating >= rating
+      );
     }
 
     if (!skipLimit && shopsWithDistance.length > limit) {
@@ -1046,7 +1322,7 @@ app.get("/nearest-shops", async (req, res) => {
     res.json(shopsWithDistance);
   });
 });
-  
+
 app.get("/setShopdata", (req, res) => {
   const { shop_id } = req.query;
 
@@ -1068,59 +1344,109 @@ app.get("/setShopdata", (req, res) => {
       contactnum: shop.contactnum,
       shop_email: shop.shop_email,
       longitude: shop.longitude,
-      latitude: shop.latitude
+      latitude: shop.latitude,
+      profilePic: shop.profilePic, 
+    });
+  });
+});
+
+app.get("/setShopdata_dash", (req, res) => {
+  const { user_id } = req.query;
+
+  const sql = `
+    SELECT 
+      t_technician.shop_username, 
+      t_technician.tech_qul,
+      t_shop.name 
+    FROM 
+      t_technician 
+    INNER JOIN 
+      t_shop 
+    ON 
+      t_technician.shop_username = t_shop.shop_name 
+    WHERE 
+      t_technician.tech_username = ?
+  `;
+
+  connection.query(sql, [user_id], (err, result) => {
+    if (err) {
+      console.error("Error fetching overall rating from the database:", err);
+      return res.status(500).send({ error: "Error fetching overall rating" });
+    }
+
+    if (result.length === 0) {
+      return res.status(404).send({ error: "Shop not found" });
+    }
+
+    res.json({
+      data: result,
     });
   });
 });
 
 // Create a new appointment
-app.post('/appointments', (req, res) => {
+app.post("/appointments", (req, res) => {
   const { username, date_time, description, shop_name } = req.body;
 
   if (!username || !date_time || !description || !shop_name) {
-    res.status(400).json({ error: 'All fields are required' });
+    res.status(400).json({ error: "All fields are required" });
     return;
   }
 
-  const checkQuery = 'SELECT * FROM appointments WHERE date_time = ? AND shop_name = ?';
+  const checkQuery =
+    "SELECT * FROM appointments WHERE date_time = ? AND shop_name = ?";
   connection.query(checkQuery, [date_time, shop_name], (err, results) => {
     if (err) {
-      console.error('Failed to check for existing appointment:', err);
-      res.status(500).json({ error: 'Failed to check for existing appointment', details: err });
+      console.error("Failed to check for existing appointment:", err);
+      res
+        .status(500)
+        .json({
+          error: "Failed to check for existing appointment",
+          details: err,
+        });
       return;
     }
 
     if (results.length > 0) {
-      res.status(400).json({ error: 'Time slot already booked' });
+      res.status(400).json({ error: "Time slot already booked" });
       return;
     }
 
-    const query = 'INSERT INTO appointments (username, date_time, description, shop_name) VALUES (?, ?, ?, ?)';
-    connection.query(query, [username, date_time, description, shop_name], (err, result) => {
-      if (err) {
-        console.error('Failed to create appointment:', err);
-        res.status(500).json({ error: 'Failed to create appointment', details: err });
-        return;
+    const query =
+      "INSERT INTO appointments (username, date_time, description, shop_name) VALUES (?, ?, ?, ?)";
+    connection.query(
+      query,
+      [username, date_time, description, shop_name],
+      (err, result) => {
+        if (err) {
+          console.error("Failed to create appointment:", err);
+          res
+            .status(500)
+            .json({ error: "Failed to create appointment", details: err });
+          return;
+        }
+        res.status(201).json({ id: result.insertId });
       }
-      res.status(201).json({ id: result.insertId });
-    });
+    );
   });
 });
 
 // Get all appointments with user and shop details
-app.get('/appointments', (req, res) => {
+app.get("/appointments", (req, res) => {
   const { date } = req.query;
-  let query = 'SELECT * FROM appointments';
+  let query = "SELECT * FROM appointments";
   const params = [];
 
   if (date) {
-    query += ' WHERE DATE(date_time) = ?';
+    query += " WHERE DATE(date_time) = ?";
     params.push(date);
   }
 
   connection.query(query, params, (err, results) => {
     if (err) {
-      res.status(500).json({ error: 'Failed to fetch appointments', details: err });
+      res
+        .status(500)
+        .json({ error: "Failed to fetch appointments", details: err });
       return;
     }
     res.status(200).json(results);
@@ -1128,128 +1454,364 @@ app.get('/appointments', (req, res) => {
 });
 
 // Get all appointments for a specific shop
-app.get('/appointments/:shop_name', (req, res) => {
+app.get("/appointments/:shop_name", (req, res) => {
   const { shop_name } = req.params;
   const { date } = req.query;
-  let query = 'SELECT * FROM appointments WHERE shop_name = ?';
+  let query = "SELECT * FROM appointments WHERE shop_name = ?";
   const params = [shop_name];
 
   if (date) {
-    query += ' AND DATE(date_time) = ?';
+    query += " AND DATE(date_time) = ?";
     params.push(date);
   }
 
   connection.query(query, params, (err, results) => {
     if (err) {
-      res.status(500).json({ error: 'Failed to fetch appointments', details: err });
+      res
+        .status(500)
+        .json({ error: "Failed to fetch appointments", details: err });
       return;
     }
     res.status(200).json(results);
   });
 });
 
-app.delete('/appointments/:username/:shop_name/:eventDateTime', (req, res) => {
-    const { username, shop_name, eventDateTime } = req.params;
-  
-    const deleteQuery = 'DELETE FROM appointments WHERE username = ? AND shop_name = ?';
-    
-    connection.query(deleteQuery, [username, shop_name, eventDateTime], (err, result) => {
+app.delete("/appointments/:username/:shop_name/:eventDateTime", (req, res) => {
+  const { username, shop_name, eventDateTime } = req.params;
+  const deleteQuery =
+    "DELETE FROM appointments WHERE username = ? AND shop_name = ? AND date_time = ?";
+
+  connection.query(
+    deleteQuery,
+    [username, shop_name, eventDateTime],
+    (err, result) => {
       if (err) {
-        console.error('Failed to delete appointment:', err);
-        res.status(500).json({ error: 'Failed to delete appointment', details: err });
+        console.error("Failed to delete appointment:", err);
+        res
+          .status(500)
+          .json({ error: "Failed to delete appointment", details: err });
         return;
       }
-      res.status(200).json({ message: 'Appointment deleted successfully' });
-    });
-  });
-  app.delete("/deleteUser/:username", (req, res) => {
-    const username = req.params.username;
-  
-    connection.query(
-      "DELETE FROM t_user WHERE username = ?",
-      [username],
-      (err, results) => {
-        if (err) {
-          console.error("Failed to delete user:", err);
-          return res.status(500).send("Failed to delete user!");
-        }
-        if (results.affectedRows === 0) {
-          return res.status(404).send("User not found!");
-        }
-        console.log("User deleted successfully");
-        return res.send("User deleted successfully!");
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: "Appointment not found" });
       }
-    );
-  });
+      res.status(200).json({ message: "Appointment deleted successfully" });
+    }
+  );
+});
 
-  app.get("/retrieve_userAcc", (req, res) => {
-    const searchInput = req.query.username;
-    console.log("searchInput:", searchInput);
-    const retrieveQuery = `SELECT * FROM t_user WHERE username = ?`;
-  
-    connection.query(retrieveQuery, [searchInput], (err, results) => {
+app.delete("/deleteUser/:username", (req, res) => {
+  const username = req.params.username;
+
+  connection.query(
+    "DELETE FROM t_user WHERE username = ?",
+    [username],
+    (err, results) => {
       if (err) {
-        console.error("Error retrieving data:", err);
-        res.status(500).json({ error: "Error retrieving data" });
-      } else {
-        console.log("Data retrieved successfully");
-        res.status(200).json(results);
+        console.error("Failed to delete user:", err);
+        return res.status(500).send("Failed to delete user!");
       }
-    });
-  });
+      if (results.affectedRows === 0) {
+        return res.status(404).send("User not found!");
+      }
+      console.log("User deleted successfully");
+      return res.send("User deleted successfully!");
+    }
+  );
+});
 
-  
-  app.post('/messages', upload.single('attachment'), (req, res) => {
-    const sender = req.body.sender;
-    const receiver = req.body.receiver;
-    const message = req.body.message;
-    const attachment = req.file ? `/uploads/${req.file.filename}` : null;
-  
-    const query = 'INSERT INTO messages (sender, receiver, message, attachment) VALUES (?, ?, ?, ?)';
-    connection.query(query, [sender, receiver, message, attachment], (err, result) => {
-      if (err) throw err;
-      const insertedId = result.insertId;
-      pusher.trigger('chat', 'message', {
-        id: insertedId,
-        sender: sender,
-        receiver: receiver,
-        message: message,
-        attachment: attachment
+app.get("/retrieve_userAcc", (req, res) => {
+  const searchInput = req.query.username;
+  console.log("searchInput:", searchInput);
+  const retrieveQuery = `SELECT * FROM t_user WHERE username = ?`;
+
+  connection.query(retrieveQuery, [searchInput], (err, results) => {
+    if (err) {
+      console.error("Error retrieving data:", err);
+      res.status(500).json({ error: "Error retrieving data" });
+    } else {
+      console.log("Data retrieved successfully");
+      res.status(200).json(results);
+    }
+  });
+});
+
+// Add message
+app.post("/messages", upload.single("attachment"), (req, res) => {
+  const { sender, receiver, message } = req.body;
+  const attachment = req.file ? `/uploads/${req.file.filename}` : null;
+
+  if (!message && !attachment) {
+    return res.status(400).json({ error: "Empty message or attachment received!" });
+  }
+
+  const query = "INSERT INTO messages (sender, receiver, message, attachment, `read`) VALUES (?, ?, ?, ?, false)";
+  connection.query(query, [sender, receiver, message, attachment], (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: "Database error." });
+    }
+    const insertedId = result.insertId;
+    pusher.trigger("chat", "message", {
+      id: insertedId,
+      sender: sender,
+      receiver: receiver,
+      message: message,
+      attachment: attachment
+    });
+    res.json({ id: insertedId });
+  });
+});
+
+// Get messages
+app.get("/messages", (req, res) => {
+  const { sender, receiver } = req.query;
+
+  const query = `
+    SELECT * FROM messages 
+    WHERE (sender = ? AND receiver = ?) OR (sender = ? AND receiver = ?)`;
+  connection.query(query, [sender, receiver, receiver, sender], (err, results) => {
+    if (err) throw err;
+    res.json(results);
+  });
+});
+
+// Get unread messages
+app.get("/messages/unread", (req, res) => {
+  const { sender, receiver } = req.query;
+
+  const query = `
+    SELECT * FROM messages 
+    WHERE ((sender = ? AND receiver = ?) OR (sender = ? AND receiver = ?)) AND \`read\` = false`;
+  connection.query(query, [sender, receiver, receiver, sender], (err, results) => {
+    if (err) throw err;
+    res.json(results);
+  });
+});
+
+// Mark messages as read
+app.post("/messages/mark-as-read", (req, res) => {
+  const { sender, receiver } = req.body;
+
+  const query = `
+    UPDATE messages 
+    SET \`read\` = true 
+    WHERE (sender = ? AND receiver = ?) OR (sender = ? AND receiver = ?)`;
+  connection.query(query, [sender, receiver, receiver, sender], (err) => {
+    if (err) return res.status(500).json({ error: "Database error." });
+    res.json({ success: true });
+  });
+});
+
+// Delete message
+app.delete("/messages/:id", (req, res) => {
+  const { id } = req.params;
+  const selectQuery = "SELECT attachment FROM messages WHERE id = ?";
+  connection.query(selectQuery, [id], (err, results) => {
+    if (err) throw err;
+    if (results.length > 0 && results[0].attachment) {
+      const filePath = path.join(__dirname, results[0].attachment);
+      fs.unlink(filePath, (err) => {
+        if (err) console.error(err);
       });
-      res.json({ id: insertedId });
+    }
+
+    const deleteQuery = "DELETE FROM messages WHERE id = ?";
+    connection.query(deleteQuery, [id], (err) => {
+      if (err) throw err;
+      pusher.trigger("chat", "delete-message", { id: id });
+      res.send("OK");
     });
   });
-  
-  app.get('/messages', (req, res) => {
-    const sender = req.query.sender;
-    const receiver = req.query.receiver;
-  
-    const query = `
-      SELECT * FROM messages 
-      WHERE (sender = ? AND receiver = ?) OR (sender = ? AND receiver = ?)`;
-    connection.query(query, [sender, receiver, receiver, sender], (err, results) => {
-      if (err) throw err;
-      res.json(results);
+});
+
+
+app.get("/set_appointments", (req, res) => {
+  const username = req.query.username;
+  const query = `
+      SELECT appointments.username, appointments.shop_name, appointments.date_time, appointments.description, t_shop.name
+      FROM appointments
+      INNER JOIN t_shop ON t_shop.shop_name = appointments.shop_name
+      WHERE appointments.date_time > NOW() AND appointments.username = ?
+      ORDER BY appointments.date_time ASC
+    `;
+
+  connection.query(query, [username], (err, results) => {
+    if (err) {
+      console.error("Error fetching appointments:", err);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+
+    res.json({ data: results });
+  });
+});
+
+app.get("/get_chat_heads", (req, res) => {
+  const username = req.query.username;
+  const query = `
+      SELECT 
+      t_shop.shop_name AS shop_username,
+        t_shop.name AS shop_name
+      FROM messages
+      JOIN t_shop ON t_shop.shop_name = 
+        CASE 
+          WHEN messages.sender = ? THEN messages.receiver 
+          ELSE messages.sender 
+        END
+      WHERE messages.sender = ? OR messages.receiver = ? 
+      GROUP BY shop_name 
+      ORDER BY MAX(messages.timestamp) DESC
+    `;
+
+  connection.query(query, [username, username, username], (err, results) => {
+    if (err) {
+      console.error("Error fetching chat heads:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+
+    res.json({ chatHeads: results });
+  });
+});
+app.get("/set_appointments_shop", (req, res) => {
+  const username = req.query.username;
+  const query = `
+      SELECT appointments.username, appointments.shop_name, appointments.date_time, appointments.description, t_shop.name
+      FROM appointments
+      INNER JOIN t_shop ON t_shop.shop_name = appointments.shop_name
+      WHERE appointments.date_time > NOW() AND appointments.shop_name = ?
+      ORDER BY appointments.date_time ASC
+    `;
+
+  connection.query(query, [username], (err, results) => {
+    if (err) {
+      console.error("Error fetching appointments:", err);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+
+    res.json({ data: results });
+  });
+});
+app.get("/get_chat_heads_shop", (req, res) => {
+  const username = req.query.username;
+  const query = `
+      SELECT 
+        t_user.username AS username1,
+        t_user.name AS name1
+      FROM messages
+      JOIN t_user ON t_user.username = 
+        CASE 
+          WHEN messages.sender = ? THEN messages.receiver 
+          ELSE messages.sender 
+        END
+      WHERE messages.sender = ? OR messages.receiver = ? 
+      GROUP BY username1, name1 
+      ORDER BY MAX(messages.timestamp) DESC
+    `;
+
+  connection.query(query, [username, username, username], (err, results) => {
+    if (err) {
+      console.error("Error fetching chat heads:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+      return;
+    }
+    res.json({ chatHeads: results });
+  });
+});
+
+app.get("/setShopdata_dash_shop", (req, res) => {
+  const { user_id } = req.query;
+
+  const sql = `
+      SELECT 
+        t_technician.shop_username, 
+        t_technician.tech_qul,
+        t_technician.tech_username,
+        t_user.name 
+      FROM 
+        t_technician 
+      INNER JOIN 
+        t_user 
+      ON 
+        t_technician.tech_username = t_user.username 
+      WHERE 
+        t_technician.shop_username = ?
+    `;
+
+  connection.query(sql, [user_id], (err, result) => {
+    if (err) {
+      console.error("Error fetching overall rating from the database:", err);
+      return res.status(500).send({ error: "Error fetching overall rating" });
+    }
+
+    if (result.length === 0) {
+      return res.status(404).send({ error: "Shop not found" });
+    }
+
+    res.json({
+      data: result,
     });
   });
+});
+app.delete("/deleteStaffItem", (req, res) => {
+  const { tech_username } = req.query;
+
+  const sql = `
+      DELETE FROM 
+        t_technician 
+      WHERE 
+        tech_username = ?
+    `;
+
+  connection.query(sql, [tech_username], (err, result) => {
+    if (err) {
+      console.error("Error deleting technician from the database:", err);
+      return res.status(500).send({ error: "Error deleting technician" });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).send({ error: "Technician not found" });
+    }
+
+    res.json({
+      message: "Technician deleted successfully",
+    });
+  });
+});
+
+app.get('/messages/unread', (req, res) => {
+  const { sender, receiver } = req.query;
   
-  app.delete('/messages/:id', (req, res) => {
-    const id = req.params.id;
-    const selectQuery = 'SELECT attachment FROM messages WHERE id = ?';
-    connection.query(selectQuery, [id], (err, results) => {
-      if (err) throw err;
-      if (results.length > 0 && results[0].attachment) {
-        const filePath = path.join(__dirname, results[0].attachment);
-        fs.unlink(filePath, (err) => {
-          if (err) console.error(err);
-        });
+  Message.find({ sender, receiver, read: false }, (err, messages) => {
+    if (err) {
+      return res.status(500).json({ error: 'Error fetching unread messages' });
+    }
+    res.json(messages);
+  });
+});
+
+function getCounts(callback) {
+  const query = `
+      SELECT 
+          (SELECT COUNT(*) FROM t_shop) AS total_shops,
+          (SELECT COUNT(*) FROM t_technician) AS total_technicians,
+          (SELECT COUNT(*) FROM t_user) AS total_users;
+  `;
+
+  connection.query(query, (error, results) => {
+      if (error) {
+          return callback(error);
       }
-  
-      const deleteQuery = 'DELETE FROM messages WHERE id = ?';
-      connection.query(deleteQuery, [id], (err) => {
-        if (err) throw err;
-        pusher.trigger('chat', 'delete-message', { id: id });
-        res.send('OK');
-      });
-    });
+      callback(null, results[0]);
   });
+}
+
+app.get('/api/counts', (req, res) => {
+  getCounts((error, counts) => {
+      if (error) {
+          console.error('Error fetching counts:', error);
+          return res.status(500).json({ error: 'Database error' });
+      }
+      res.json(counts);
+  });
+});
