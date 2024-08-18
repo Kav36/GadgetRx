@@ -45,7 +45,6 @@
             id="search"
             placeholder="Search by sender, receiver, or message"
           />
-          <button type="submit" class="btn btn-secondary">Search</button>
         </form>
       </div>
 
@@ -126,7 +125,7 @@
             saveMessage();
           });
       
-          document.getElementById("searchForm").addEventListener("submit", function (event) {
+          document.getElementById("searchForm").addEventListener("input", function (event) {
             event.preventDefault();
             searchMessages();
           });

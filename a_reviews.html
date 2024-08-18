@@ -40,6 +40,17 @@
         </div>
         <button type="submit" class="btn btn-primary">Add Review</button>
       </form>
+ <!-- Search Form -->
+ <div class="mb-4">
+  <form id="searchForm" class="d-flex">
+    <input
+      type="text"
+      class="form-control me-2"
+      id="searchInput"
+      placeholder="Search by Person ID or Shop ID"
+    />
+  </form>
+</div>
 
       <!-- Review List -->
       <h2 class="text-center mb-4">Existing Reviews</h2>
@@ -129,29 +140,39 @@
               saveReview();
             });
         });
+        function loadReviews(searchQuery = "") {
+  const url = searchQuery
+    ? `http://localhost:3000/admin/reviews?search=${encodeURIComponent(searchQuery)}`
+    : "http://localhost:3000/admin/reviews";
 
-        function loadReviews() {
-          fetch("http://localhost:3000/admin/reviews")
-            .then((response) => response.json())
-            .then((data) => {
-              const reviewsTable = document
-                .getElementById("reviewsTable")
-                .getElementsByTagName("tbody")[0];
-              reviewsTable.innerHTML = "";
-              data.forEach((review) => {
-                const row = reviewsTable.insertRow();
-                row.innerHTML = `
-                  <td>${review.person_id}</td>
-                  <td>${review.shop_id}</td>
-                  <td>${review.stars}</td>
-                  <td>${review.comment}</td>
-                  <td>
-                    <button class="btn btn-danger btn-sm" onclick="deleteReview('${review.person_id}', '${review.shop_id}')">Delete</button>
-                  </td>
-                `;
-              });
-            });
-        }
+  fetch(url)
+    .then((response) => response.json())
+    .then((data) => {
+      const reviewsTable = document
+        .getElementById("reviewsTable")
+        .getElementsByTagName("tbody")[0];
+      reviewsTable.innerHTML = "";
+      data.forEach((review) => {
+        const row = reviewsTable.insertRow();
+        row.innerHTML = `
+          <td>${review.person_id}</td>
+          <td>${review.shop_id}</td>
+          <td>${review.stars}</td>
+          <td>${review.comment}</td>
+          <td>
+            <button class="btn btn-danger btn-sm" onclick="deleteReview('${review.person_id}', '${review.shop_id}')">Delete</button>
+          </td>
+        `;
+      });
+    });
+}
+
+// Add event listener for search input
+document.getElementById("searchInput").addEventListener("input", function () {
+  const searchQuery = this.value.trim();
+  loadReviews(searchQuery);
+});
+
 
         function addReview() {
           const formData = {

@@ -1821,15 +1821,6 @@ app.get('/api/counts', (req, res) => {
 
 // Read appointments
 app.get('/admin/appointments', (req, res) => {
-  const sql = 'SELECT * FROM appointments';
-  connection.query(sql, (err, results) => {
-      if (err) throw err;
-      res.json(results);
-  });
-});
-
-// Create appointment
-app.get('/admin/appointments', (req, res) => {
   const searchQuery = req.query.search || '';
 
   const sql = `
@@ -1840,6 +1831,24 @@ app.get('/admin/appointments', (req, res) => {
   connection.query(sql, [`%${searchQuery}%`, `%${searchQuery}%`, `%${searchQuery}%`], (err, results) => {
     if (err) throw err;
     res.json(results);
+  });
+});
+
+// Create appointment
+app.post('/admin/appointments', (req, res) => {
+  const { username, shop_name, date_time, description } = req.body;
+
+  const sql = `
+    INSERT INTO appointments (username, shop_name, date_time, description)
+    VALUES (?, ?, ?, ?)
+  `;
+
+  connection.query(sql, [username, shop_name, date_time, description], (err, result) => {
+    if (err) {
+      res.json({ success: false, message: 'Failed to add appointment' });
+      throw err;
+    }
+    res.json({ success: true, message: 'Appointment added successfully' });
   });
 });
 
@@ -1889,8 +1898,14 @@ app.delete('/admin/appointments/:username/:shop_name/:date_time', (req, res) => 
 
 // Read comments
 app.get('/admin/comments', (req, res) => {
-  const sql = 'SELECT * FROM comments';
-  connection.query(sql, (err, results) => {
+  const searchQuery = req.query.search ? `%${req.query.search}%` : '%';
+  const sql = `
+    SELECT * FROM comments 
+    WHERE person_id LIKE ? 
+    OR shop_id LIKE ? 
+    OR comment LIKE ?
+  `;
+  connection.query(sql, [searchQuery, searchQuery, searchQuery], (err, results) => {
     if (err) throw err;
     res.json(results);
   });
@@ -1996,12 +2011,19 @@ app.delete('/admin/messages/:id', (req, res) => {
 
 // Read reviews
 app.get('/admin/reviews', (req, res) => {
-  const sql = 'SELECT * FROM reviews';
-  connection.query(sql, (err, results) => {
+  const searchQuery = req.query.search || '';
+  let sql = 'SELECT * FROM reviews';
+
+  if (searchQuery) {
+    sql += ' WHERE person_id LIKE ? OR shop_id LIKE ?';
+  }
+
+  connection.query(sql, [`%${searchQuery}%`, `%${searchQuery}%`], (err, results) => {
     if (err) throw err;
     res.json(results);
   });
 });
+
 
 // Create a new review
 app.post('/admin/reviews', (req, res) => {
@@ -2036,12 +2058,23 @@ app.delete('/admin/reviews/:person_id/:shop_id', (req, res) => {
 
 // Read shops
 app.get('/admin/shops', (req, res) => {
-  const sql = 'SELECT * FROM t_shop';
-  connection.query(sql, (err, results) => {
-      if (err) throw err;
-      res.json(results);
+  let sql = 'SELECT * FROM t_shop';
+  const params = [];
+
+  if (req.query.shop_name) {
+    sql += ' WHERE shop_name LIKE ?';
+    params.push(`%${req.query.shop_name}%`);
+  } else if (req.query.owner_username) {
+    sql += ' WHERE owner_username LIKE ?';
+    params.push(`%${req.query.owner_username}%`);
+  }
+
+  connection.query(sql, params, (err, results) => {
+    if (err) throw err;
+    res.json(results);
   });
 });
+
 
 // Create a new shop
 app.post('/admin/shops', (req, res) => {
@@ -2086,12 +2119,18 @@ app.delete('/admin/shops/:owner_username/:shop_name', (req, res) => {
 
 // Read technicians
 app.get('/admin/technicians', (req, res) => {
-  const sql = 'SELECT * FROM t_technician';
-  connection.query(sql, (err, results) => {
+  const search = req.query.search;
+  let sql = 'SELECT * FROM t_technician';
+  if (search) {
+    sql += ' WHERE tech_username LIKE ? OR shop_username LIKE ?';
+  }
+
+  connection.query(sql, [`%${search}%`, `%${search}%`], (err, results) => {
     if (err) throw err;
     res.json(results);
   });
 });
+
 
 // Create a new technician
 app.post('/admin/technicians', (req, res) => {
@@ -2136,12 +2175,23 @@ app.delete('/admin/technicians/:tech_username', (req, res) => {
 
 // Read users
 app.get('/admin/users', (req, res) => {
-  const sql = 'SELECT * FROM t_user';
-  connection.query(sql, (err, results) => {
-    if (err) throw err;
-    res.json(results);
+  const search = req.query.search || ''; 
+  const sql = `
+      SELECT * FROM t_user
+      WHERE name LIKE ? 
+      OR username LIKE ? 
+      OR email LIKE ? 
+      OR contactnum LIKE ? 
+      OR type LIKE ?
+  `;
+  const searchTerm = `%${search}%`;
+
+  connection.query(sql, [searchTerm, searchTerm, searchTerm, searchTerm, searchTerm], (err, results) => {
+      if (err) throw err;
+      res.json(results);
   });
 });
+
 
 // Create a new user
 app.post('/admin/users', (req, res) => {

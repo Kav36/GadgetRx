@@ -37,6 +37,18 @@
       <button type="submit" class="btn btn-primary">Add Comment</button>
     </form>
 
+    <!-- Search Form -->
+    <div class="mb-4">
+      <form id="searchForm" class="d-flex">
+          <input
+              type="text"
+              class="form-control me-2"
+              id="searchQuery"
+              placeholder="Search comments"
+          />
+      </form>
+  </div>
+
     <!-- Comment List -->
     <h2 class="text-center mb-4">Existing Comments</h2>
     <div class="comments-table-container">
@@ -121,43 +133,46 @@
       document.addEventListener("DOMContentLoaded", function () {
         loadComments();
 
-        document
-          .getElementById("commentForm")
-          .addEventListener("submit", function (event) {
-            event.preventDefault();
-            addComment();
-          });
+        document.getElementById("commentForm").addEventListener("submit", function (event) {
+          event.preventDefault();
+          addComment();
+        });
 
-        document
-          .getElementById("editCommentForm")
-          .addEventListener("submit", function (event) {
-            event.preventDefault();
-            saveComment();
-          });
+        document.getElementById("editCommentForm").addEventListener("submit", function (event) {
+          event.preventDefault();
+          saveComment();
+        });
+
+        document.getElementById("searchQuery").addEventListener("input", function () {
+                searchComments();
+            });
       });
 
-      function loadComments() {
-        fetch("http://localhost:3000/admin/comments")
+      function loadComments(query = '') {
+        fetch(`http://localhost:3000/admin/comments?search=${encodeURIComponent(query)}`)
           .then((response) => response.json())
           .then((data) => {
-            const commentsTable = document
-              .getElementById("commentsTable")
-              .getElementsByTagName("tbody")[0];
+            const commentsTable = document.getElementById("commentsTable").getElementsByTagName("tbody")[0];
             commentsTable.innerHTML = "";
             data.forEach((comment) => {
               const row = commentsTable.insertRow();
               row.innerHTML = `
-                    <td>${comment.person_id}</td>
-                    <td>${comment.shop_id}</td>
-                    <td>${comment.comment}</td>
-                    <td>${new Date(comment.created_at).toLocaleString()}</td>
-                    <td>
-                        <button class="btn btn-danger btn-sm" onclick="deleteComment('${comment.id}')">Delete</button>
-                        <button class="btn btn-primary btn-sm" onclick="editComment(${comment.id}, '${comment.person_id}', '${comment.shop_id}', '${comment.comment}')">Edit</button>
-                    </td>
-                `;
+                <td>${comment.person_id}</td>
+                <td>${comment.shop_id}</td>
+                <td>${comment.comment}</td>
+                <td>${new Date(comment.created_at).toLocaleString()}</td>
+                <td>
+                    <button class="btn btn-danger btn-sm" onclick="deleteComment('${comment.id}')">Delete</button>
+                    <button class="btn btn-primary btn-sm" onclick="editComment(${comment.id}, '${comment.person_id}', '${comment.shop_id}', '${comment.comment}')">Edit</button>
+                </td>
+              `;
             });
           });
+      }
+
+      function searchComments() {
+        const query = document.getElementById("searchQuery").value;
+        loadComments(query);
       }
 
       function addComment() {
@@ -189,9 +204,7 @@
         document.getElementById("edit_person_id").value = person_id;
         document.getElementById("edit_shop_id").value = shop_id;
         document.getElementById("edit_comment").value = comment;
-        var editModal = new bootstrap.Modal(
-          document.getElementById("editCommentModal")
-        );
+        var editModal = new bootstrap.Modal(document.getElementById("editCommentModal"));
         editModal.show();
       }
 

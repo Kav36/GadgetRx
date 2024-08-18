@@ -1,276 +1,277 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Panel - Manage Shop</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <style>
-      .reviews-table-container {
-        max-height: 400px;
-        overflow-x: auto;
-        overflow-y: auto;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container mt-5">
-      <h1 class="text-center mb-4">Manage Shop</h1>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel - Manage Shop</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    .reviews-table-container {
+      max-height: 400px;
+      overflow-x: auto;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-5">
+    <h1 class="text-center mb-4">Manage Shop</h1>
 
-      <!-- Add/Edit Shop Form -->
-      <form id="shopForm" class="mb-4">
-        <input type="hidden" id="editMode" value="false" />
-        <div class="mb-3">
-          <label for="owner_username" class="form-label">Owner Username</label>
-          <input type="text" class="form-control" id="owner_username" required />
-        </div>
-        <div class="mb-3">
-          <label for="shop_name" class="form-label">Shop Name</label>
-          <input type="text" class="form-control" id="shop_name" required />
-        </div>
-        <div class="mb-3">
-          <label for="name" class="form-label">Name</label>
-          <input type="text" class="form-control" id="name" required />
-        </div>
-        <div class="mb-3">
-          <label for="shop_email" class="form-label">Shop Email</label>
-          <input type="email" class="form-control" id="shop_email" required />
-        </div>
-        <div class="mb-3">
-          <label for="contactnum" class="form-label">Contact Number</label>
-          <input type="text" class="form-control" id="contactnum" required />
-        </div>
-        <div class="mb-3">
-          <label for="shop_type" class="form-label">Shop Type</label>
-          <input type="text" class="form-control" id="shop_type" required />
-        </div>
-        <div class="mb-3">
-          <label for="shop_des" class="form-label">Shop Description</label>
-          <textarea class="form-control" id="shop_des" required></textarea>
-        </div>
-        <div class="mb-3">
-          <label for="latitude" class="form-label">Latitude</label>
-          <input type="text" class="form-control" id="latitude" required />
-        </div>
-        <div class="mb-3">
-          <label for="longitude" class="form-label">Longitude</label>
-          <input type="text" class="form-control" id="longitude" required />
-        </div>
-        <div class="mb-3">
-          <label for="profilePic" class="form-label">Profile Picture URL</label>
-          <input type="url" class="form-control" id="profilePic" required />
-        </div>
-        <button type="submit" class="btn btn-primary" id="submitButton">
-          Add Shop
-        </button>
-        <button
-          type="button"
-          class="btn btn-secondary"
-          id="cancelButton"
-          style="display: none"
-          onclick="cancelEdit()"
-        >
-          Cancel Edit
-        </button>
-      </form>
-
-      <!-- Shops Table -->
-      <div class="table-responsive">
-        <table class="table table-bordered" id="shopsTable">
-          <thead>
-            <tr>
-              <th>Owner Username</th>
-              <th>Shop Name</th>
-              <th>Name</th>
-              <th>Shop Email</th>
-              <th>Contact Number</th>
-              <th>Shop Type</th>
-              <th>Shop Description</th>
-              <th>Latitude</th>
-              <th>Longitude</th>
-              <th>Profile Picture</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Dynamic rows will be inserted here -->
-          </tbody>
-        </table>
+    <!-- Add/Edit Shop Form -->
+    <form id="shopForm" class="mb-4">
+      <input type="hidden" id="editMode" value="false" />
+      <div class="mb-3">
+        <label for="owner_username" class="form-label">Owner Username</label>
+        <input type="text" class="form-control" id="owner_username" required />
       </div>
+      <div class="mb-3">
+        <label for="shop_name" class="form-label">Shop Name</label>
+        <input type="text" class="form-control" id="shop_name" required />
+      </div>
+      <div class="mb-3">
+        <label for="name" class="form-label">Name</label>
+        <input type="text" class="form-control" id="name" required />
+      </div>
+      <div class="mb-3">
+        <label for="shop_email" class="form-label">Shop Email</label>
+        <input type="email" class="form-control" id="shop_email" required />
+      </div>
+      <div class="mb-3">
+        <label for="contactnum" class="form-label">Contact Number</label>
+        <input type="text" class="form-control" id="contactnum" required />
+      </div>
+      <div class="mb-3">
+        <label for="shop_type" class="form-label">Shop Type</label>
+        <input type="text" class="form-control" id="shop_type" required />
+      </div>
+      <div class="mb-3">
+        <label for="shop_des" class="form-label">Shop Description</label>
+        <textarea class="form-control" id="shop_des" required></textarea>
+      </div>
+      <div class="mb-3">
+        <label for="latitude" class="form-label">Latitude</label>
+        <input type="text" class="form-control" id="latitude" required />
+      </div>
+      <div class="mb-3">
+        <label for="longitude" class="form-label">Longitude</label>
+        <input type="text" class="form-control" id="longitude" required />
+      </div>
+      <div class="mb-3">
+        <label for="profilePic" class="form-label">Profile Picture URL</label>
+        <input type="url" class="form-control" id="profilePic" required />
+      </div>
+      <button type="submit" class="btn btn-primary" id="submitButton">Add Shop</button>
+      <button type="button" class="btn btn-secondary" id="cancelButton" style="display: none" onclick="cancelEdit()">Cancel Edit</button>
+    </form>
+
+    <!-- Search Form -->
+    <div class="mb-4">
+      <form id="searchForm" class="d-flex">
+        <input type="text" class="form-control me-2" id="searchInput"  oninput="searchShops()" placeholder="Search by shop name or owner username" />
+       
+      </form>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        loadShops();
+    <!-- Shops Table -->
+    <div class="table-responsive">
+      <table class="table table-bordered" id="shopsTable">
+        <thead>
+          <tr>
+            <th>Owner Username</th>
+            <th>Shop Name</th>
+            <th>Name</th>
+            <th>Shop Email</th>
+            <th>Contact Number</th>
+            <th>Shop Type</th>
+            <th>Shop Description</th>
+            <th>Latitude</th>
+            <th>Longitude</th>
+            <th>Profile Picture</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Dynamic rows will be inserted here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-        document
-          .getElementById("shopForm")
-          .addEventListener("submit", function (event) {
-            event.preventDefault();
-            const editMode = document.getElementById("editMode").value;
-            if (editMode === "true") {
-              updateShop();
-            } else {
-              addShop();
-            }
-          });
-      });
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      loadShops();
 
-      function loadShops() {
-        fetch("http://localhost:3000/admin/shops")
-          .then((response) => response.json())
-          .then((data) => {
-            const shopsTable = document
-              .getElementById("shopsTable")
-              .getElementsByTagName("tbody")[0];
-            shopsTable.innerHTML = "";
-            data.forEach((shop) => {
-              const row = shopsTable.insertRow();
-              row.innerHTML = `
-                <td>${shop.owner_username}</td>
-                <td>${shop.shop_name}</td>
-                <td>${shop.name}</td>
-                <td>${shop.shop_email}</td>
-                <td>${shop.contactnum}</td>
-                <td>${shop.shop_type}</td>
-                <td>${shop.shop_des}</td>
-                <td>${shop.latitude}</td>
-                <td>${shop.longitude}</td>
-                <td><img src="${shop.profilePic}" alt="Profile Pic" style="width: 50px; height: 50px;"></td>
-                <td>
-                  <button class="btn btn-primary btn-sm" onclick="editShop('${shop.owner_username}', '${shop.shop_name}', '${shop.name}', '${shop.shop_email}', '${shop.contactnum}', '${shop.shop_type}', '${shop.shop_des}', '${shop.latitude}', '${shop.longitude}', '${shop.profilePic}')">Edit</button>
-                  <button class="btn btn-danger btn-sm" onclick="deleteShop('${shop.owner_username}', '${shop.shop_name}')">Delete</button>
-                </td>
-              `;
-            });
-          });
-      }
-
-      function addShop() {
-        const formData = {
-          owner_username: document.getElementById("owner_username").value,
-          shop_name: document.getElementById("shop_name").value,
-          name: document.getElementById("name").value,
-          shop_email: document.getElementById("shop_email").value,
-          contactnum: document.getElementById("contactnum").value,
-          shop_type: document.getElementById("shop_type").value,
-          shop_des: document.getElementById("shop_des").value,
-          latitude: document.getElementById("latitude").value,
-          longitude: document.getElementById("longitude").value,
-          profilePic: document.getElementById("profilePic").value,
-        };
-
-        fetch("http://localhost:3000/admin/shops", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.success) {
-              loadShops();
-              resetForm();
-            } else {
-              alert("Failed to add shop");
-            }
-          });
-      }
-
-      function editShop(
-        owner_username,
-        shop_name,
-        name,
-        shop_email,
-        contactnum,
-        shop_type,
-        shop_des,
-        latitude,
-        longitude,
-        profilePic
-      ) {
-        document.getElementById("editMode").value = "true";
-        document.getElementById("owner_username").value = owner_username;
-        document.getElementById("shop_name").value = shop_name;
-        document.getElementById("name").value = name;
-        document.getElementById("shop_email").value = shop_email;
-        document.getElementById("contactnum").value = contactnum;
-        document.getElementById("shop_type").value = shop_type;
-        document.getElementById("shop_des").value = shop_des;
-        document.getElementById("latitude").value = latitude;
-        document.getElementById("longitude").value = longitude;
-        document.getElementById("profilePic").value = profilePic;
-
-        document.getElementById("submitButton").textContent = "Update Shop";
-        document.getElementById("cancelButton").style.display = "inline-block";
-      }
-
-      function updateShop() {
-        const formData = {
-          owner_username: document.getElementById("owner_username").value,
-          shop_name: document.getElementById("shop_name").value,
-          name: document.getElementById("name").value,
-          shop_email: document.getElementById("shop_email").value,
-          contactnum: document.getElementById("contactnum").value,
-          shop_type: document.getElementById("shop_type").value,
-          shop_des: document.getElementById("shop_des").value,
-          latitude: document.getElementById("latitude").value,
-          longitude: document.getElementById("longitude").value,
-          profilePic: document.getElementById("profilePic").value,
-        };
-
-        fetch(`http://localhost:3000/admin/shops/${formData.shop_name}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.success) {
-              loadShops();
-              resetForm();
-            } else {
-              alert("Failed to update shop");
-            }
-          });
-      }
-
-      function deleteShop(owner_username, shop_name) {
-        if (confirm("Are you sure you want to delete this shop?")) {
-          fetch(
-            `http://localhost:3000/admin/shops?owner_username=${owner_username}&shop_name=${shop_name}`,
-            {
-              method: "DELETE",
-            }
-          )
-            .then((response) => response.json())
-            .then((data) => {
-              if (data.success) {
-                loadShops();
-              } else {
-                alert("Failed to delete shop");
-              }
-            });
+      document.getElementById("shopForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+        const editMode = document.getElementById("editMode").value;
+        if (editMode === "true") {
+          updateShop();
+        } else {
+          addShop();
         }
+      });
+    });
+
+    function searchShops() {
+      const searchInput = document.getElementById("searchInput").value.trim();
+      const queryParams = new URLSearchParams();
+
+      if (searchInput) {
+        queryParams.append("shop_name", searchInput);
+        // If you want to allow searching by owner username, you can switch to:
+        // queryParams.append("owner_username", searchInput);
       }
 
-      function cancelEdit() {
-        resetForm();
-      }
+      fetch(`http://localhost:3000/admin/shops?${queryParams.toString()}`)
+        .then((response) => response.json())
+        .then((data) => {
+          const shopsTable = document.getElementById("shopsTable").getElementsByTagName("tbody")[0];
+          shopsTable.innerHTML = "";
+          data.forEach((shop) => {
+            const row = shopsTable.insertRow();
+            row.innerHTML = `
+              <td>${shop.owner_username}</td>
+              <td>${shop.shop_name}</td>
+              <td>${shop.name}</td>
+              <td>${shop.shop_email}</td>
+              <td>${shop.contactnum}</td>
+              <td>${shop.shop_type}</td>
+              <td>${shop.shop_des}</td>
+              <td>${shop.latitude}</td>
+              <td>${shop.longitude}</td>
+              <td><img src="${shop.profilePic}" alt="Profile Pic" style="width: 50px; height: 50px;"></td>
+              <td>
+                <button class="btn btn-primary btn-sm" onclick="editShop('${shop.owner_username}', '${shop.shop_name}', '${shop.name}', '${shop.shop_email}', '${shop.contactnum}', '${shop.shop_type}', '${shop.shop_des}', '${shop.latitude}', '${shop.longitude}', '${shop.profilePic}')">Edit</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteShop('${shop.owner_username}', '${shop.shop_name}')">Delete</button>
+              </td>
+            `;
+          });
+        });
+    }
 
-      function resetForm() {
-        document.getElementById("editMode").value = "false";
-        document.getElementById("shopForm").reset();
-        document.getElementById("submitButton").textContent = "Add Shop";
-        document.getElementById("cancelButton").style.display = "none";
+    function loadShops() {
+      fetch("http://localhost:3000/admin/shops")
+        .then((response) => response.json())
+        .then((data) => {
+          const shopsTable = document.getElementById("shopsTable").getElementsByTagName("tbody")[0];
+          shopsTable.innerHTML = "";
+          data.forEach((shop) => {
+            const row = shopsTable.insertRow();
+            row.innerHTML = `
+              <td>${shop.owner_username}</td>
+              <td>${shop.shop_name}</td>
+              <td>${shop.name}</td>
+              <td>${shop.shop_email}</td>
+              <td>${shop.contactnum}</td>
+              <td>${shop.shop_type}</td>
+              <td>${shop.shop_des}</td>
+              <td>${shop.latitude}</td>
+              <td>${shop.longitude}</td>
+              <td><img src="${shop.profilePic}" alt="Profile Pic" style="width: 50px; height: 50px;"></td>
+              <td>
+                <button class="btn btn-primary btn-sm" onclick="editShop('${shop.owner_username}', '${shop.shop_name}', '${shop.name}', '${shop.shop_email}', '${shop.contactnum}', '${shop.shop_type}', '${shop.shop_des}', '${shop.latitude}', '${shop.longitude}', '${shop.profilePic}')">Edit</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteShop('${shop.owner_username}', '${shop.shop_name}')">Delete</button>
+              </td>
+            `;
+          });
+        });
+    }
+
+    function addShop() {
+      const formData = {
+        owner_username: document.getElementById("owner_username").value,
+        shop_name: document.getElementById("shop_name").value,
+        name: document.getElementById("name").value,
+        shop_email: document.getElementById("shop_email").value,
+        contactnum: document.getElementById("contactnum").value,
+        shop_type: document.getElementById("shop_type").value,
+        shop_des: document.getElementById("shop_des").value,
+        latitude: document.getElementById("latitude").value,
+        longitude: document.getElementById("longitude").value,
+        profilePic: document.getElementById("profilePic").value,
+      };
+
+      fetch("http://localhost:3000/admin/shops", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          loadShops();
+          document.getElementById("shopForm").reset();
+        });
+    }
+
+    function editShop(owner_username, shop_name, name, shop_email, contactnum, shop_type, shop_des, latitude, longitude, profilePic) {
+      document.getElementById("editMode").value = "true";
+      document.getElementById("owner_username").value = owner_username;
+      document.getElementById("shop_name").value = shop_name;
+      document.getElementById("name").value = name;
+      document.getElementById("shop_email").value = shop_email;
+      document.getElementById("contactnum").value = contactnum;
+      document.getElementById("shop_type").value = shop_type;
+      document.getElementById("shop_des").value = shop_des;
+      document.getElementById("latitude").value = latitude;
+      document.getElementById("longitude").value = longitude;
+      document.getElementById("profilePic").value = profilePic;
+
+      document.getElementById("submitButton").textContent = "Update Shop";
+      document.getElementById("cancelButton").style.display = "inline-block";
+    }
+
+    function updateShop() {
+      const formData = {
+        owner_username: document.getElementById("owner_username").value,
+        shop_name: document.getElementById("shop_name").value,
+        name: document.getElementById("name").value,
+        shop_email: document.getElementById("shop_email").value,
+        contactnum: document.getElementById("contactnum").value,
+        shop_type: document.getElementById("shop_type").value,
+        shop_des: document.getElementById("shop_des").value,
+        latitude: document.getElementById("latitude").value,
+        longitude: document.getElementById("longitude").value,
+        profilePic: document.getElementById("profilePic").value,
+      };
+
+      fetch(`http://localhost:3000/admin/shops/${formData.owner_username}/${formData.shop_name}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          loadShops();
+          document.getElementById("shopForm").reset();
+          document.getElementById("editMode").value = "false";
+          document.getElementById("submitButton").textContent = "Add Shop";
+          document.getElementById("cancelButton").style.display = "none";
+        });
+    }
+
+    function cancelEdit() {
+      document.getElementById("shopForm").reset();
+      document.getElementById("editMode").value = "false";
+      document.getElementById("submitButton").textContent = "Add Shop";
+      document.getElementById("cancelButton").style.display = "none";
+    }
+
+    function deleteShop(owner_username, shop_name) {
+      if (confirm("Are you sure you want to delete this shop?")) {
+        fetch(`http://localhost:3000/admin/shops/${owner_username}/${shop_name}`, {
+          method: "DELETE",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            loadShops();
+          });
       }
-    </script>
-  </body>
+    }
+  </script>
+</body>
 </html>

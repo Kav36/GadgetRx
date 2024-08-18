@@ -9,14 +9,12 @@
       rel="stylesheet"
     />
     <style>
-        .appointments-table-container {
-          max-height: 400px;
-          overflow-x: auto;
-          overflow-y: auto;
-        }
-      </style>
-      
-      
+      .appointments-table-container {
+        max-height: 400px;
+        overflow-x: auto;
+        overflow-y: auto;
+      }
+    </style>
   </head>
   <body>
     <div class="container mt-5">
@@ -47,244 +45,251 @@
         </div>
         <button type="submit" class="btn btn-primary">Add Appointment</button>
       </form>
-<!-- Search Form -->
-<div class="mb-4">
-    <form id="searchForm" class="d-flex">
-      <input
-        type="text"
-        class="form-control me-2"
-        id="searchInput"
-        placeholder="Search by username, shop name, or description"
-      />
-      <button type="submit" class="btn btn-secondary">Search</button>
-    </form>
-  </div>
-  
+
+      <!-- Search Form -->
+      <div class="mb-4">
+        <form id="searchForm" class="d-flex">
+          <input
+            type="text"
+            class="form-control me-2"
+            id="searchInput"
+            placeholder="Search by username, shop name, or description"
+          />
+        </form>
+      </div>
+
       <!-- Appointment List -->
-<h2 class="text-center mb-4">Existing Appointments</h2>
-<div class="appointments-table-container">
-  <table class="table table-bordered appointments-table" id="appointmentsTable">
-    <thead>
-      <tr>
-        <th>Username</th>
-        <th>Shop Name</th>
-        <th>Date & Time</th>
-        <th>Description</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Rows will be dynamically added here -->
-    </tbody>
-  </table>
-</div>
+      <h2 class="text-center mb-4">Existing Appointments</h2>
+      <div class="appointments-table-container">
+        <table class="table table-bordered appointments-table" id="appointmentsTable">
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Shop Name</th>
+              <th>Date & Time</th>
+              <th>Description</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Rows will be dynamically added here -->
+          </tbody>
+        </table>
+      </div>
 
-
-    <!-- Edit Appointment Modal -->
-    <div
-      class="modal fade"
-      id="editAppointmentModal"
-      tabindex="-1"
-      aria-labelledby="editAppointmentModalLabel"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="editAppointmentModalLabel">
-              Edit Appointment
-            </h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
-          </div>
-          <div class="modal-body">
-            <form id="editAppointmentForm">
-              <input type="hidden" id="edit_id" />
-              <div class="mb-3">
-                <label for="edit_username" class="form-label">Username</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="edit_username"
-                  required
-                />
-              </div>
-              <div class="mb-3">
-                <label for="edit_shop_name" class="form-label">Shop Name</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="edit_shop_name"
-                  required
-                />
-              </div>
-              <div class="mb-3">
-                <label for="edit_date_time" class="form-label"
-                  >Date & Time</label
-                >
-                <input
-                  type="datetime-local"
-                  class="form-control"
-                  id="edit_date_time"
-                  required
-                />
-              </div>
-              <div class="mb-3">
-                <label for="edit_description" class="form-label"
-                  >Description</label
-                >
-                <input
-                  type="text"
-                  class="form-control"
-                  id="edit_description"
-                  required
-                />
-              </div>
-              <button type="submit" class="btn btn-primary">
-                Save Changes
-              </button>
-            </form>
+      <!-- Edit Appointment Modal -->
+      <div
+        class="modal fade"
+        id="editAppointmentModal"
+        tabindex="-1"
+        aria-labelledby="editAppointmentModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="editAppointmentModalLabel">
+                Edit Appointment
+              </h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <form id="editAppointmentForm">
+                <input type="hidden" id="edit_id" />
+                <div class="mb-3">
+                  <label for="edit_username" class="form-label">Username</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="edit_username"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="edit_shop_name" class="form-label">Shop Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="edit_shop_name"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="edit_date_time" class="form-label"
+                    >Date & Time</label
+                  >
+                  <input
+                    type="datetime-local"
+                    class="form-control"
+                    id="edit_date_time"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="edit_description" class="form-label"
+                    >Description</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="edit_description"
+                    required
+                  />
+                </div>
+                <button type="submit" class="btn btn-primary">
+                  Save Changes
+                </button>
+              </form>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        loadAppointments();
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          loadAppointments();
 
-        document
-          .getElementById("appointmentForm")
-          .addEventListener("submit", function (event) {
-            event.preventDefault();
-            addAppointment();
-          });
+          document
+            .getElementById("appointmentForm")
+            .addEventListener("submit", function (event) {
+              event.preventDefault();
+              addAppointment();
+            });
 
-        document
-          .getElementById("editAppointmentForm")
-          .addEventListener("submit", function (event) {
-            event.preventDefault();
-            saveAppointment();
-          });
-      });
+          document
+            .getElementById("editAppointmentForm")
+            .addEventListener("submit", function (event) {
+              event.preventDefault();
+              saveAppointment();
+            });
 
-      function loadAppointments(searchQuery = "") {
-  fetch(`http://localhost:3000/admin/appointments?search=${encodeURIComponent(searchQuery)}`)
-    .then((response) => response.json())
-    .then((data) => {
-      const appointmentsTable = document
-        .getElementById("appointmentsTable")
-        .getElementsByTagName("tbody")[0];
-      appointmentsTable.innerHTML = "";
-      data.forEach((appointment) => {
-        const row = appointmentsTable.insertRow();
-        row.innerHTML = `
-          <td>${appointment.username}</td>
-          <td>${appointment.shop_name}</td>
-          <td>${new Date(appointment.date_time).toLocaleString()}</td>
-          <td>${appointment.description}</td>
-          <td>
-            <button class="btn btn-danger btn-sm" onclick="deleteAppointment('${appointment.username}', '${appointment.shop_name}', '${appointment.date_time}')">Delete</button>
-          </td>
-        `;
-      });
-    });
-}
+          document
+            .getElementById("searchForm")
+            .addEventListener("input", function (event) {
+              event.preventDefault();
+              const searchQuery = document.getElementById("searchInput").value;
+              loadAppointments(searchQuery);
+            });
+        });
 
-      function addAppointment() {
-        const formData = {
-          username: document.getElementById("username").value,
-          shop_name: document.getElementById("shop_name").value,
-          date_time: document.getElementById("date_time").value,
-          description: document.getElementById("description").value,
-        };
+        function loadAppointments(searchQuery = "") {
+          fetch(`http://localhost:3000/admin/appointments?search=${encodeURIComponent(searchQuery)}`)
+            .then((response) => response.json())
+            .then((data) => {
+              const appointmentsTable = document
+                .getElementById("appointmentsTable")
+                .getElementsByTagName("tbody")[0];
+              appointmentsTable.innerHTML = "";
+              data.forEach((appointment) => {
+                const row = appointmentsTable.insertRow();
+                row.innerHTML = `
+                  <td>${appointment.username}</td>
+                  <td>${appointment.shop_name}</td>
+                  <td>${new Date(appointment.date_time).toLocaleString()}</td>
+                  <td>${appointment.description}</td>
+                  <td>
+                    <button class="btn btn-danger btn-sm" onclick="deleteAppointment('${appointment.username}', '${appointment.shop_name}', '${appointment.date_time}')">Delete</button>
+                    <button class="btn btn-warning btn-sm ms-2" onclick="editAppointment('${appointment.username}', '${appointment.shop_name}', '${appointment.date_time}', '${appointment.description}')">Edit</button>
+                  </td>
+                `;
+              });
+            });
+        }
 
-        fetch("http://localhost:3000/admin/appointments", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.success) {
-              loadAppointments();
-            } else {
-              alert("Failed to add appointment");
-            }
-          });
-      }
+        function addAppointment() {
+          const formData = {
+            username: document.getElementById("username").value,
+            shop_name: document.getElementById("shop_name").value,
+            date_time: document.getElementById("date_time").value,
+            description: document.getElementById("description").value,
+          };
 
-      function editAppointment(username, shop_name, date_time, description) {
-        document.getElementById("edit_username").value = username;
-        document.getElementById("edit_shop_name").value = shop_name;
-        document.getElementById("edit_date_time").value = date_time;
-        document.getElementById("edit_description").value = description;
-        var editModal = new bootstrap.Modal(
-          document.getElementById("editAppointmentModal")
-        );
-        editModal.show();
-      }
-      function saveAppointment() {
-  const username = document.getElementById("edit_username").value;
-  const shop_name = document.getElementById("edit_shop_name").value;
-  const date_time = document.getElementById("edit_date_time").value; // Ensure this matches backend expectations
-  const description = document.getElementById("edit_description").value;
-
-  fetch(
-    `http://localhost:3000/admin/appointments/${encodeURIComponent(username)}/${encodeURIComponent(shop_name)}/${encodeURIComponent(date_time)}`,
-    {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ description }),
-    }
-  )
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      loadAppointments();
-    } else {
-      alert("Failed to update appointment");
-    }
-  })
-  .catch(error => console.error("There was a problem with the fetch operation:", error));
-}
-
-
-
-
-      function deleteAppointment(username, shop_name, date_time) {
-        if (
-          confirm(
-            `Are you sure you want to delete the appointment for ${username} at ${shop_name} on ${new Date(
-              date_time
-            ).toLocaleString()}?`
-          )
-        ) {
-          fetch(
-            `http://localhost:3000/admin/appointments/${username}/${shop_name}/${date_time}`,
-            {
-              method: "DELETE",
-            }
-          )
+          fetch("http://localhost:3000/admin/appointments", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+          })
             .then((response) => response.json())
             .then((data) => {
               if (data.success) {
                 loadAppointments();
               } else {
-                alert("Failed to delete appointment");
+                alert("Failed to add appointment");
               }
             });
         }
-      }
-    </script>
+
+        function editAppointment(username, shop_name, date_time, description) {
+          document.getElementById("edit_username").value = username;
+          document.getElementById("edit_shop_name").value = shop_name;
+          document.getElementById("edit_date_time").value = date_time;
+          document.getElementById("edit_description").value = description;
+          var editModal = new bootstrap.Modal(
+            document.getElementById("editAppointmentModal")
+          );
+          editModal.show();
+        }
+
+        function saveAppointment() {
+          const username = document.getElementById("edit_username").value;
+          const shop_name = document.getElementById("edit_shop_name").value;
+          const date_time = document.getElementById("edit_date_time").value;
+          const description = document.getElementById("edit_description").value;
+
+          fetch(
+            `http://localhost:3000/admin/appointments/${encodeURIComponent(username)}/${encodeURIComponent(shop_name)}/${encodeURIComponent(date_time)}`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ description }),
+            }
+          )
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                loadAppointments();
+              } else {
+                alert("Failed to update appointment");
+              }
+            })
+            .catch(error => console.error("There was a problem with the fetch operation:", error));
+        }
+
+        function deleteAppointment(username, shop_name, date_time) {
+          if (
+            confirm(
+              `Are you sure you want to delete the appointment for ${username} at ${shop_name} on ${new Date(
+                date_time
+              ).toLocaleString()}?`
+            )
+          ) {
+            fetch(
+              `http://localhost:3000/admin/appointments/${encodeURIComponent(username)}/${encodeURIComponent(shop_name)}/${encodeURIComponent(date_time)}`,
+              {
+                method: "DELETE",
+              }
+            )
+              .then((response) => response.json())
+              .then((data) => {
+                if (data.success) {
+                  loadAppointments();
+                } else {
+                  alert("Failed to delete appointment");
+                }
+              });
+          }
+        }
+      </script>
+    </div>
   </body>
 </html>
