@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel - Comments</title>
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <style>
+    .comments-table-container {
+      max-height: 400px;
+      overflow-x: auto;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-5">
+    <h1 class="text-center mb-4">Manage Comments</h1>
+
+    <!-- Add Comment Form -->
+    <form id="commentForm" class="mb-4">
+      <div class="mb-3">
+        <label for="person_id" class="form-label">Person ID</label>
+        <input type="text" class="form-control" id="person_id" required />
+      </div>
+      <div class="mb-3">
+        <label for="shop_id" class="form-label">Shop ID</label>
+        <input type="text" class="form-control" id="shop_id" required />
+      </div>
+      <div class="mb-3">
+        <label for="comment" class="form-label">Comment</label>
+        <textarea class="form-control" id="comment" rows="3" required></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Add Comment</button>
+    </form>
+
+    <!-- Comment List -->
+    <h2 class="text-center mb-4">Existing Comments</h2>
+    <div class="comments-table-container">
+      <table class="table table-bordered comments-table" id="commentsTable">
+        <thead>
+          <tr>
+            <th>Person ID</th>
+            <th>Shop ID</th>
+            <th>Comment</th>
+            <th>Created At</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Rows will be dynamically added here -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Edit Comment Modal -->
+    <div
+      class="modal fade"
+      id="editCommentModal"
+      tabindex="-1"
+      aria-labelledby="editCommentModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editCommentModalLabel">
+              Edit Comment
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="editCommentForm">
+              <input type="hidden" id="edit_id" />
+              <div class="mb-3">
+                <label for="edit_person_id" class="form-label">Person ID</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="edit_person_id"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="edit_shop_id" class="form-label">Shop ID</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="edit_shop_id"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="edit_comment" class="form-label">Comment</label>
+                <textarea
+                  class="form-control"
+                  id="edit_comment"
+                  rows="3"
+                  required
+                ></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">
+                Save Changes
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        loadComments();
+
+        document
+          .getElementById("commentForm")
+          .addEventListener("submit", function (event) {
+            event.preventDefault();
+            addComment();
+          });
+
+        document
+          .getElementById("editCommentForm")
+          .addEventListener("submit", function (event) {
+            event.preventDefault();
+            saveComment();
+          });
+      });
+
+      function loadComments() {
+        fetch("http://localhost:3000/admin/comments")
+          .then((response) => response.json())
+          .then((data) => {
+            const commentsTable = document
+              .getElementById("commentsTable")
+              .getElementsByTagName("tbody")[0];
+            commentsTable.innerHTML = "";
+            data.forEach((comment) => {
+              const row = commentsTable.insertRow();
+              row.innerHTML = `
+                    <td>${comment.person_id}</td>
+                    <td>${comment.shop_id}</td>
+                    <td>${comment.comment}</td>
+                    <td>${new Date(comment.created_at).toLocaleString()}</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" onclick="deleteComment('${comment.id}')">Delete</button>
+                        <button class="btn btn-primary btn-sm" onclick="editComment(${comment.id}, '${comment.person_id}', '${comment.shop_id}', '${comment.comment}')">Edit</button>
+                    </td>
+                `;
+            });
+          });
+      }
+
+      function addComment() {
+        const formData = {
+          person_id: document.getElementById("person_id").value,
+          shop_id: document.getElementById("shop_id").value,
+          comment: document.getElementById("comment").value,
+        };
+
+        fetch("http://localhost:3000/admin/comments", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              loadComments();
+            } else {
+              alert("Failed to add comment");
+            }
+          });
+      }
+
+      function editComment(id, person_id, shop_id, comment) {
+        document.getElementById("edit_id").value = id;
+        document.getElementById("edit_person_id").value = person_id;
+        document.getElementById("edit_shop_id").value = shop_id;
+        document.getElementById("edit_comment").value = comment;
+        var editModal = new bootstrap.Modal(
+          document.getElementById("editCommentModal")
+        );
+        editModal.show();
+      }
+
+      function saveComment() {
+        const id = document.getElementById("edit_id").value;
+        const person_id = document.getElementById("edit_person_id").value;
+        const shop_id = document.getElementById("edit_shop_id").value;
+        const comment = document.getElementById("edit_comment").value;
+
+        fetch(`http://localhost:3000/admin/comments/${id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ person_id, shop_id, comment }),
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              loadComments();
+            } else {
+              alert("Failed to update comment");
+            }
+          })
+          .catch(error => console.error("There was a problem with the fetch operation:", error));
+      }
+
+      function deleteComment(id) {
+        if (confirm("Are you sure you want to delete this comment?")) {
+          fetch(`http://localhost:3000/admin/comments/${id}`, {
+            method: "DELETE",
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                loadComments();
+              } else {
+                alert("Failed to delete comment");
+              }
+            });
+        }
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Panel - Technicians</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      .technicians-table-container {
+        max-height: 400px;
+        overflow-x: auto;
+        overflow-y: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h1 class="text-center mb-4">Manage Technicians</h1>
+
+      <!-- Add Technician Form -->
+      <form id="technicianForm" class="mb-4">
+        <div class="mb-3">
+          <label for="shop_username" class="form-label">Shop Username</label>
+          <input type="text" class="form-control" id="shop_username" required />
+        </div>
+        <div class="mb-3">
+          <label for="tech_username" class="form-label">Technician Username</label>
+          <input type="text" class="form-control" id="tech_username" required />
+        </div>
+        <div class="mb-3">
+          <label for="tech_des" class="form-label">Technician Description</label>
+          <input type="text" class="form-control" id="tech_des" />
+        </div>
+        <div class="mb-3">
+          <label for="tech_qul" class="form-label">Technician Qualification</label>
+          <input type="text" class="form-control" id="tech_qul" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Add Technician</button>
+      </form>
+
+      <!-- Technicians Table -->
+      <div class="technicians-table-container">
+        <table class="table table-bordered" id="techniciansTable">
+          <thead>
+            <tr>
+              <th>Shop Username</th>
+              <th>Technician Username</th>
+              <th>Description</th>
+              <th>Qualification</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Technician rows will be dynamically added here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Edit Technician Modal -->
+    <div class="modal fade" id="editTechnicianModal" tabindex="-1" aria-labelledby="editTechnicianModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editTechnicianModalLabel">Edit Technician</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="editTechnicianForm">
+              <div class="mb-3">
+                <label for="edit_shop_username" class="form-label">Shop Username</label>
+                <input type="text" class="form-control" id="edit_shop_username" readonly />
+              </div>
+              <div class="mb-3">
+                <label for="edit_tech_username" class="form-label">Technician Username</label>
+                <input type="text" class="form-control" id="edit_tech_username" readonly />
+              </div>
+              <div class="mb-3">
+                <label for="edit_tech_des" class="form-label">Technician Description</label>
+                <input type="text" class="form-control" id="edit_tech_des" />
+              </div>
+              <div class="mb-3">
+                <label for="edit_tech_qul" class="form-label">Technician Qualification</label>
+                <input type="text" class="form-control" id="edit_tech_qul" required />
+              </div>
+              <button type="submit" class="btn btn-primary">Save Changes</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        loadTechnicians();
+
+        document
+          .getElementById("technicianForm")
+          .addEventListener("submit", function (event) {
+            event.preventDefault();
+            addTechnician();
+          });
+
+        document
+          .getElementById("editTechnicianForm")
+          .addEventListener("submit", function (event) {
+            event.preventDefault();
+            saveTechnician();
+          });
+      });
+
+      function loadTechnicians() {
+        fetch("http://localhost:3000/admin/technicians")
+          .then((response) => response.json())
+          .then((data) => {
+            const techniciansTable = document
+              .getElementById("techniciansTable")
+              .getElementsByTagName("tbody")[0];
+            techniciansTable.innerHTML = "";
+            data.forEach((technician) => {
+              const row = techniciansTable.insertRow();
+              row.innerHTML = `
+                <td>${technician.shop_username}</td>
+                <td>${technician.tech_username}</td>
+                <td>${technician.tech_des}</td>
+                <td>${technician.tech_qul}</td>
+                <td>
+                  <button class="btn btn-warning btn-sm" onclick="editTechnician('${technician.shop_username}', '${technician.tech_username}', '${technician.tech_des}', '${technician.tech_qul}')">Edit</button>
+                  <button class="btn btn-danger btn-sm" onclick="deleteTechnician('${technician.tech_username}')">Delete</button>
+                </td>
+              `;
+            });
+          });
+      }
+
+      function addTechnician() {
+        const formData = {
+          shop_username: document.getElementById("shop_username").value,
+          tech_username: document.getElementById("tech_username").value,
+          tech_des: document.getElementById("tech_des").value,
+          tech_qul: document.getElementById("tech_qul").value,
+        };
+
+        fetch("http://localhost:3000/admin/technicians", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              loadTechnicians();
+            } else {
+              alert("Failed to add technician");
+            }
+          });
+      }
+
+      function editTechnician(shop_username, tech_username, tech_des, tech_qul) {
+        document.getElementById("edit_shop_username").value = shop_username;
+        document.getElementById("edit_tech_username").value = tech_username;
+        document.getElementById("edit_tech_des").value = tech_des;
+        document.getElementById("edit_tech_qul").value = tech_qul;
+        var editModal = new bootstrap.Modal(
+          document.getElementById("editTechnicianModal")
+        );
+        editModal.show();
+      }
+
+      function saveTechnician() {
+        const shop_username = document.getElementById("edit_shop_username").value;
+        const tech_username = document.getElementById("edit_tech_username").value;
+        const tech_des = document.getElementById("edit_tech_des").value;
+        const tech_qul = document.getElementById("edit_tech_qul").value;
+
+        fetch(
+          `http://localhost:3000/admin/technicians/${encodeURIComponent(tech_username)}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ tech_des, tech_qul }),
+          }
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              loadTechnicians();
+            } else {
+              alert("Failed to update technician");
+            }
+          });
+      }
+
+      function deleteTechnician(tech_username) {
+        if (confirm(`Are you sure you want to delete technician ${tech_username}?`)) {
+          fetch(`http://localhost:3000/admin/technicians/${tech_username}`, {
+            method: "DELETE",
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                loadTechnicians();
+              } else {
+                alert("Failed to delete technician");
+              }
+            });
+        }
+      }
+    </script>
+  </body>
+</html>

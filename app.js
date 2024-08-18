@@ -5,16 +5,12 @@ const session = require("express-session");
 const path = require("path");
 const multer = require("multer");
 const cors = require("cors");
-const csvParser = require("csv-parser");
 const dotenv = require("dotenv");
-const stream = require("stream");
-const request = require("request");
-const cheerio = require("cheerio");
+const moment = require('moment');
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 const fs = require("fs");
 const Pusher = require("pusher");
-const { body, validationResult } = require("express-validator");
 
 dotenv.config();
 const config = JSON.parse(fs.readFileSync("./config.json"));
@@ -145,7 +141,7 @@ app.post("/login", async (req, res) => {
   }
 
   connection.query(
-    "SELECT username, password FROM t_user WHERE email = ?",
+    "SELECT username, password, type FROM t_user WHERE email = ?",
     [email],
     async (error, results) => {
       if (error) {
@@ -196,6 +192,7 @@ app.post("/login", async (req, res) => {
       } else {
         const storedPassword = results[0].password;
         const username = results[0].username;
+        const userType = results[0].type;
 
         try {
           const passwordMatch = await bcrypt.compare(password, storedPassword);
@@ -211,7 +208,13 @@ app.post("/login", async (req, res) => {
 
           console.log("Logged in as:", username);
 
-          return res.redirect("dashboard_user.html");
+          if (userType === 'admin') {
+            return res.redirect("admin.html");
+          }
+          else{
+            return res.redirect("dashboard_user.html");
+        }
+          
         } catch (bcryptError) {
           console.error("Error comparing passwords:", bcryptError);
           return res.status(500).send("Internal server error");
@@ -1813,5 +1816,370 @@ app.get('/api/counts', (req, res) => {
           return res.status(500).json({ error: 'Database error' });
       }
       res.json(counts);
+  });
+});
+
+// Read appointments
+app.get('/admin/appointments', (req, res) => {
+  const sql = 'SELECT * FROM appointments';
+  connection.query(sql, (err, results) => {
+      if (err) throw err;
+      res.json(results);
+  });
+});
+
+// Create appointment
+app.get('/admin/appointments', (req, res) => {
+  const searchQuery = req.query.search || '';
+
+  const sql = `
+    SELECT * FROM appointments
+    WHERE username LIKE ? OR shop_name LIKE ? OR description LIKE ?
+  `;
+  
+  connection.query(sql, [`%${searchQuery}%`, `%${searchQuery}%`, `%${searchQuery}%`], (err, results) => {
+    if (err) throw err;
+    res.json(results);
+  });
+});
+
+app.put('/admin/appointments/:username/:shop_name/:date_time', (req, res) => {
+  const { username, shop_name, date_time } = req.params;
+  const { description } = req.body;
+
+  console.log('Received:', { username, shop_name, date_time, description });
+
+  if (!description) {
+    return res.status(400).json({ success: false, message: 'Description is required' });
+  }
+
+  const formattedDateTime = moment(date_time).format('YYYY-MM-DD HH:mm:ss');
+
+  console.log('Formatted Date-Time:', formattedDateTime);
+
+  const sql = 'UPDATE appointments SET description = ? WHERE username = ? AND shop_name = ? AND date_time = ?';
+
+  console.log('Executing SQL:', { sql, parameters: [description, username, shop_name, formattedDateTime] });
+
+  connection.query(sql, [description, username, shop_name, formattedDateTime], (err, results) => {
+    if (err) {
+      console.error('Error executing SQL:', err.message);
+      return res.status(500).json({ success: false, message: 'Database error' });
+    }
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: 'Appointment not found' });
+    }
+    res.json({ success: true });
+  });  
+});
+
+// Delete appointment
+app.delete('/admin/appointments/:username/:shop_name/:date_time', (req, res) => {
+  const { username, shop_name, date_time } = req.params;
+
+  const formattedDateTime = moment(date_time).format('YYYY-MM-DD HH:mm:ss');
+
+  const sql = 'DELETE FROM appointments WHERE username = ? AND shop_name = ? AND date_time = ?';
+
+  connection.query(sql, [username, shop_name, formattedDateTime], (err, results) => {
+    if (err) throw err;
+    res.json({ success: true });
+  });
+});
+
+// Read comments
+app.get('/admin/comments', (req, res) => {
+  const sql = 'SELECT * FROM comments';
+  connection.query(sql, (err, results) => {
+    if (err) throw err;
+    res.json(results);
+  });
+});
+
+// Create comment
+app.post('/admin/comments', (req, res) => {
+  const { person_id, shop_id, comment } = req.body;
+  const sql = 'INSERT INTO comments (person_id, shop_id, comment) VALUES (?, ?, ?)';
+  connection.query(sql, [person_id, shop_id, comment], (err, results) => {
+    if (err) throw err;
+    res.json({ success: true });
+  });
+});
+
+// Update comment
+app.put('/admin/comments/:id', (req, res) => {
+  const { id } = req.params;
+  const { person_id, shop_id, comment } = req.body;
+
+  if (!person_id || !shop_id || !comment) {
+    return res.status(400).json({ success: false, message: 'Missing required fields' });
+  }
+
+  const sql = 'UPDATE comments SET person_id = ?, shop_id = ?, comment = ? WHERE id = ?';
+  connection.query(sql, [person_id, shop_id, comment, id], (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ success: false, message: 'Database error' });
+    }
+    if (results.affectedRows > 0) {
+      res.json({ success: true });
+    } else {
+      res.status(404).json({ success: false, message: 'Comment not found' });
+    }
+  });
+});
+
+// Delete comment
+app.delete('/admin/comments/:id', (req, res) => {
+  const { id } = req.params;
+
+  const sql = 'DELETE FROM comments WHERE id = ?';
+  connection.query(sql, [id], (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ success: false, message: 'Database error' });
+    }
+    if (results.affectedRows > 0) {
+      res.json({ success: true });
+    } else {
+      res.status(404).json({ success: false, message: 'Comment not found' });
+    }
+  });
+});
+
+// Read messages
+app.get('/admin/messages', (req, res) => {
+  const search = req.query.search || '';
+  const sql = `SELECT * FROM messages WHERE sender LIKE ? OR receiver LIKE ? OR message LIKE ?`;
+  const values = [`%${search}%`, `%${search}%`, `%${search}%`];
+  
+  connection.query(sql, values, (err, results) => {
+    if (err) throw err;
+    res.json(results);
+  });
+});
+
+
+// Create message
+app.post('/admin/messages', (req, res) => {
+  const { sender, receiver, message } = req.body;
+  const sql = 'INSERT INTO messages (sender, receiver, message) VALUES (?, ?, ?)';
+  connection.query(sql, [sender, receiver, message], (err, results) => {
+      if (err) throw err;
+      res.json({ success: true });
+  });
+});
+
+// Update message
+app.put('/admin/messages/:id', (req, res) => {
+  const { id } = req.params;
+  const { sender, receiver, message } = req.body;
+  const sql = 'UPDATE messages SET sender = ?, receiver = ?, message = ? WHERE id = ?';
+  connection.query(sql, [sender, receiver, message, id], (err, results) => {
+    if (err) throw err;
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: 'Message not found' });
+    }
+    res.json({ success: true });
+  });
+});
+
+// Delete message
+app.delete('/admin/messages/:id', (req, res) => {
+  const { id } = req.params;
+  const sql = 'DELETE FROM messages WHERE id = ?';
+  connection.query(sql, [id], (err, results) => {
+    if (err) throw err;
+    res.json({ success: true });
+  });
+});
+
+// Read reviews
+app.get('/admin/reviews', (req, res) => {
+  const sql = 'SELECT * FROM reviews';
+  connection.query(sql, (err, results) => {
+    if (err) throw err;
+    res.json(results);
+  });
+});
+
+// Create a new review
+app.post('/admin/reviews', (req, res) => {
+  const { person_id, shop_id, stars, comment } = req.body;
+  const sql = 'INSERT INTO reviews (person_id, shop_id, stars, comment) VALUES (?, ?, ?, ?)';
+  connection.query(sql, [person_id, shop_id, stars, comment], (err, result) => {
+    if (err) throw err;
+    res.json({ success: true });
+  });
+});
+
+// Update an existing review
+app.put('/admin/reviews/:person_id/:shop_id', (req, res) => {
+  const { person_id, shop_id } = req.params;
+  const { stars, comment } = req.body;
+  const sql = 'UPDATE reviews SET stars = ?, comment = ? WHERE person_id = ? AND shop_id = ?';
+  connection.query(sql, [stars, comment, person_id, shop_id], (err, result) => {
+    if (err) throw err;
+    res.json({ success: true });
+  });
+});
+
+// Delete a review
+app.delete('/admin/reviews/:person_id/:shop_id', (req, res) => {
+  const { person_id, shop_id } = req.params;
+  const sql = 'DELETE FROM reviews WHERE person_id = ? AND shop_id = ?';
+  connection.query(sql, [person_id, shop_id], (err, result) => {
+    if (err) throw err;
+    res.json({ success: true });
+  });
+});
+
+// Read shops
+app.get('/admin/shops', (req, res) => {
+  const sql = 'SELECT * FROM t_shop';
+  connection.query(sql, (err, results) => {
+      if (err) throw err;
+      res.json(results);
+  });
+});
+
+// Create a new shop
+app.post('/admin/shops', (req, res) => {
+  const { owner_username, shop_name, name, shop_email, contactnum, shop_type, shop_des, latitude, longitude, overall_rating, password, profilePic } = req.body;
+  const sql = 'INSERT INTO t_shop (owner_username, shop_name, name, shop_email, contactnum, shop_type, shop_des, latitude, longitude, overall_rating, password, profilePic) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+  connection.query(sql, [owner_username, shop_name, name, shop_email, contactnum, shop_type, shop_des, latitude, longitude, overall_rating, password, profilePic], (err, results) => {
+      if (err) throw err;
+      res.json({ success: true });
+  });
+});
+
+// Update a shop
+app.put('/admin/shops/:owner_username/:shop_name', (req, res) => {
+  const { owner_username, shop_name } = req.params;
+  const { name, shop_email, contactnum, shop_type, shop_des, latitude, longitude, overall_rating, password, profilePic } = req.body;
+
+  const sql = 'UPDATE t_shop SET name = ?, shop_email = ?, contactnum = ?, shop_type = ?, shop_des = ?, latitude = ?, longitude = ?, overall_rating = ?, password = ?, profilePic = ? WHERE owner_username = ? AND shop_name = ?';
+
+  connection.query(sql, [name, shop_email, contactnum, shop_type, shop_des, latitude, longitude, overall_rating, password, profilePic, owner_username, shop_name], (err, results) => {
+    if (err) {
+      console.error('Error executing SQL:', err.message);
+      return res.status(500).json({ success: false, message: 'Database error' });
+    }
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: 'Shop not found' });
+    }
+    res.json({ success: true });
+  });
+});
+
+// Delete a shop
+app.delete('/admin/shops/:owner_username/:shop_name', (req, res) => {
+  const { owner_username, shop_name } = req.params;
+
+  const sql = 'DELETE FROM t_shop WHERE owner_username = ? AND shop_name = ?';
+
+  connection.query(sql, [owner_username, shop_name], (err, results) => {
+    if (err) throw err;
+    res.json({ success: true });
+  });
+});
+
+// Read technicians
+app.get('/admin/technicians', (req, res) => {
+  const sql = 'SELECT * FROM t_technician';
+  connection.query(sql, (err, results) => {
+    if (err) throw err;
+    res.json(results);
+  });
+});
+
+// Create a new technician
+app.post('/admin/technicians', (req, res) => {
+  const { shop_username, tech_username, tech_des, tech_qul } = req.body;
+  const sql = 'INSERT INTO t_technician (shop_username, tech_username, tech_des, tech_qul) VALUES (?, ?, ?, ?)';
+  connection.query(sql, [shop_username, tech_username, tech_des, tech_qul], (err, results) => {
+    if (err) throw err;
+    res.json({ success: true });
+  });
+});
+
+// Update a technician
+app.put('/admin/technicians/:tech_username', (req, res) => {
+  const { tech_username } = req.params;
+  const { shop_username, tech_des, tech_qul } = req.body;
+
+  const sql = 'UPDATE t_technician SET shop_username = ?, tech_des = ?, tech_qul = ? WHERE tech_username = ?';
+
+  connection.query(sql, [shop_username, tech_des, tech_qul, tech_username], (err, results) => {
+    if (err) {
+      console.error('Error executing SQL:', err.message);
+      return res.status(500).json({ success: false, message: 'Database error' });
+    }
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: 'Technician not found' });
+    }
+    res.json({ success: true });
+  });
+});
+
+// Delete a technician
+app.delete('/admin/technicians/:tech_username', (req, res) => {
+  const { tech_username } = req.params;
+
+  const sql = 'DELETE FROM t_technician WHERE tech_username = ?';
+
+  connection.query(sql, [tech_username], (err, results) => {
+    if (err) throw err;
+    res.json({ success: true });
+  });
+});
+
+// Read users
+app.get('/admin/users', (req, res) => {
+  const sql = 'SELECT * FROM t_user';
+  connection.query(sql, (err, results) => {
+    if (err) throw err;
+    res.json(results);
+  });
+});
+
+// Create a new user
+app.post('/admin/users', (req, res) => {
+  const { name, username, email, contactnum, latitude, longitude, password, profilePic } = req.body;
+  const sql = 'INSERT INTO t_user (name, username, email, contactnum, latitude, longitude, password, profilePic) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+  connection.query(sql, [name, username, email, contactnum, latitude, longitude, password, profilePic], (err, results) => {
+    if (err) throw err;
+    res.json({ success: true });
+  });
+});
+
+// Update a user
+app.put('/admin/users/:username', (req, res) => {
+  const { username } = req.params;
+  const { name, email, contactnum, latitude, longitude, password, profilePic } = req.body;
+
+  const sql = 'UPDATE t_user SET name = ?, email = ?, contactnum = ?, latitude = ?, longitude = ?, password = ?, profilePic = ? WHERE username = ?';
+
+  connection.query(sql, [name, email, contactnum, latitude, longitude, password, profilePic, username], (err, results) => {
+    if (err) {
+      console.error('Error executing SQL:', err.message);
+      return res.status(500).json({ success: false, message: 'Database error' });
+    }
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    res.json({ success: true });
+  });
+});
+
+// Delete a user
+app.delete('/admin/users/:username', (req, res) => {
+  const { username } = req.params;
+
+  const sql = 'DELETE FROM t_user WHERE username = ?';
+
+  connection.query(sql, [username], (err, results) => {
+    if (err) throw err;
+    res.json({ success: true });
   });
 });

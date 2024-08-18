@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Panel - Messages</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      .messages-table-container {
+        max-height: 400px;
+        overflow-x: auto;
+        overflow-y: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h1 class="text-center mb-4">Manage Messages</h1>
+
+      <!-- Add Message Form -->
+      <form id="messageForm" class="mb-4">
+        <div class="mb-3">
+          <label for="sender" class="form-label">Sender</label>
+          <input type="text" class="form-control" id="sender" required />
+        </div>
+        <div class="mb-3">
+          <label for="receiver" class="form-label">Receiver</label>
+          <input type="text" class="form-control" id="receiver" required />
+        </div>
+        <div class="mb-3">
+          <label for="message" class="form-label">Message</label>
+          <textarea class="form-control" id="message" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Message</button>
+      </form>
+
+      <div class="mb-4">
+        <form id="searchForm" class="d-flex">
+          <input
+            type="text"
+            class="form-control me-2"
+            id="search"
+            placeholder="Search by sender, receiver, or message"
+          />
+          <button type="submit" class="btn btn-secondary">Search</button>
+        </form>
+      </div>
+
+      <!-- Message List -->
+
+      <h2 class="text-center mb-4">Existing Messages</h2>
+      <div class="messages-table-container">
+        <table class="table table-bordered messages-table" id="messagesTable">
+          <thead>
+            <tr>
+              <th>Sender</th>
+              <th>Receiver</th>
+              <th>Message</th>
+              <th>Timestamp</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Rows will be dynamically added here -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Edit Message Modal -->
+      <div
+        class="modal fade"
+        id="editMessageModal"
+        tabindex="-1"
+        aria-labelledby="editMessageModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="editMessageModalLabel">Edit Message</h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <form id="editMessageForm">
+                <input type="hidden" id="edit_id" />
+                <div class="mb-3">
+                  <label for="edit_sender" class="form-label">Sender</label>
+                  <input type="text" class="form-control" id="edit_sender" required />
+                </div>
+                <div class="mb-3">
+                  <label for="edit_receiver" class="form-label">Receiver</label>
+                  <input type="text" class="form-control" id="edit_receiver" required />
+                </div>
+                <div class="mb-3">
+                  <label for="edit_message" class="form-label">Message</label>
+                  <textarea class="form-control" id="edit_message" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          loadMessages(); // Load all messages initially
+      
+          document.getElementById("messageForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+            addMessage();
+          });
+      
+          document.getElementById("editMessageForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+            saveMessage();
+          });
+      
+          document.getElementById("searchForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+            searchMessages();
+          });
+        });
+      
+        function loadMessages(query = '') {
+          fetch(`http://localhost:3000/admin/messages${query ? `?search=${encodeURIComponent(query)}` : ''}`)
+            .then((response) => response.json())
+            .then((data) => {
+              const messagesTable = document.getElementById("messagesTable").getElementsByTagName("tbody")[0];
+              messagesTable.innerHTML = "";
+              data.forEach((message) => {
+                const row = messagesTable.insertRow();
+                row.innerHTML = `
+                  <td>${message.sender}</td>
+                  <td>${message.receiver}</td>
+                  <td>${message.message}</td>
+                  <td>${new Date(message.timestamp).toLocaleString()}</td>
+                  <td>
+                    <button class="btn btn-danger btn-sm" onclick="deleteMessage(${message.id})">Delete</button>
+                  </td>
+                `;
+              });
+            });
+        }
+      
+        function searchMessages() {
+          const searchQuery = document.getElementById("search").value;
+          loadMessages(searchQuery);
+        }
+      
+        function addMessage() {
+          const formData = {
+            sender: document.getElementById("sender").value,
+            receiver: document.getElementById("receiver").value,
+            message: document.getElementById("message").value,
+          };
+      
+          fetch("http://localhost:3000/admin/messages", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                loadMessages();
+              } else {
+                alert("Failed to add message");
+              }
+            });
+        }
+      
+        function saveMessage() {
+          const id = document.getElementById("edit_id").value;
+          const formData = {
+            sender: document.getElementById("edit_sender").value,
+            receiver: document.getElementById("edit_receiver").value,
+            message: document.getElementById("edit_message").value,
+          };
+      
+          fetch(`http://localhost:3000/admin/messages/${id}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                loadMessages();
+              } else {
+                alert("Failed to update message");
+              }
+            });
+        }
+      
+        function deleteMessage(id) {
+          if (confirm(`Are you sure you want to delete this message?`)) {
+            fetch(`http://localhost:3000/admin/messages/${id}`, {
+              method: "DELETE",
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                if (data.success) {
+                  loadMessages();
+                } else {
+                  alert("Failed to delete message");
+                }
+              });
+          }
+        }
+      </script>
+      
+  </body>
+</html>

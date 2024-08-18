@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Panel - Reviews</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      .reviews-table-container {
+        max-height: 400px;
+        overflow-x: auto;
+        overflow-y: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h1 class="text-center mb-4">Manage Reviews</h1>
+
+      <!-- Add Review Form -->
+      <form id="reviewForm" class="mb-4">
+        <div class="mb-3">
+          <label for="person_id" class="form-label">Person ID</label>
+          <input type="text" class="form-control" id="person_id" required />
+        </div>
+        <div class="mb-3">
+          <label for="shop_id" class="form-label">Shop ID</label>
+          <input type="text" class="form-control" id="shop_id" required />
+        </div>
+        <div class="mb-3">
+          <label for="stars" class="form-label">Stars</label>
+          <input type="number" class="form-control" id="stars" min="1" max="5" required />
+        </div>
+        <div class="mb-3">
+          <label for="comment" class="form-label">Comment</label>
+          <textarea class="form-control" id="comment" rows="3" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Review</button>
+      </form>
+
+      <!-- Review List -->
+      <h2 class="text-center mb-4">Existing Reviews</h2>
+      <div class="reviews-table-container">
+        <table class="table table-bordered reviews-table" id="reviewsTable">
+          <thead>
+            <tr>
+              <th>Person ID</th>
+              <th>Shop ID</th>
+              <th>Stars</th>
+              <th>Comment</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Rows will be dynamically added here -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Edit Review Modal -->
+      <div
+        class="modal fade"
+        id="editReviewModal"
+        tabindex="-1"
+        aria-labelledby="editReviewModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="editReviewModalLabel">Edit Review</h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <form id="editReviewForm">
+                <input type="hidden" id="edit_person_id" />
+                <input type="hidden" id="edit_shop_id" />
+                <div class="mb-3">
+                  <label for="edit_stars" class="form-label">Stars</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="edit_stars"
+                    min="1"
+                    max="5"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="edit_comment" class="form-label">Comment</label>
+                  <textarea
+                    class="form-control"
+                    id="edit_comment"
+                    rows="3"
+                    required
+                  ></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          loadReviews();
+
+          document
+            .getElementById("reviewForm")
+            .addEventListener("submit", function (event) {
+              event.preventDefault();
+              addReview();
+            });
+
+          document
+            .getElementById("editReviewForm")
+            .addEventListener("submit", function (event) {
+              event.preventDefault();
+              saveReview();
+            });
+        });
+
+        function loadReviews() {
+          fetch("http://localhost:3000/admin/reviews")
+            .then((response) => response.json())
+            .then((data) => {
+              const reviewsTable = document
+                .getElementById("reviewsTable")
+                .getElementsByTagName("tbody")[0];
+              reviewsTable.innerHTML = "";
+              data.forEach((review) => {
+                const row = reviewsTable.insertRow();
+                row.innerHTML = `
+                  <td>${review.person_id}</td>
+                  <td>${review.shop_id}</td>
+                  <td>${review.stars}</td>
+                  <td>${review.comment}</td>
+                  <td>
+                    <button class="btn btn-danger btn-sm" onclick="deleteReview('${review.person_id}', '${review.shop_id}')">Delete</button>
+                  </td>
+                `;
+              });
+            });
+        }
+
+        function addReview() {
+          const formData = {
+            person_id: document.getElementById("person_id").value,
+            shop_id: document.getElementById("shop_id").value,
+            stars: document.getElementById("stars").value,
+            comment: document.getElementById("comment").value,
+          };
+
+          fetch("http://localhost:3000/admin/reviews", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                loadReviews();
+              } else {
+                alert("Failed to add review");
+              }
+            });
+        }
+
+        function editReview(person_id, shop_id, stars, comment) {
+          document.getElementById("edit_person_id").value = person_id;
+          document.getElementById("edit_shop_id").value = shop_id;
+          document.getElementById("edit_stars").value = stars;
+          document.getElementById("edit_comment").value = comment;
+          var editModal = new bootstrap.Modal(
+            document.getElementById("editReviewModal")
+          );
+          editModal.show();
+        }
+
+        function saveReview() {
+          const person_id = document.getElementById("edit_person_id").value;
+          const shop_id = document.getElementById("edit_shop_id").value;
+          const stars = document.getElementById("edit_stars").value;
+          const comment = document.getElementById("edit_comment").value;
+
+          fetch(
+            `http://localhost:3000/admin/reviews/${encodeURIComponent(person_id)}/${encodeURIComponent(shop_id)}`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ stars, comment }),
+            }
+          )
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                loadReviews();
+              } else {
+                alert("Failed to update review");
+              }
+            })
+            .catch((error) =>
+              console.error("There was a problem with the fetch operation:", error)
+            );
+        }
+
+        function deleteReview(person_id, shop_id) {
+          if (
+            confirm(
+              `Are you sure you want to delete the review for Person ID: ${person_id} and Shop ID: ${shop_id}?`
+            )
+          ) {
+            fetch(
+              `http://localhost:3000/admin/reviews/${person_id}/${shop_id}`,
+              {
+                method: "DELETE",
+              }
+            )
+              .then((response) => response.json())
+              .then((data) => {
+                if (data.success) {
+                  loadReviews();
+                } else {
+                  alert("Failed to delete review");
+                }
+              });
+          }
+        }
+      </script>
+  </body>
+</html>
