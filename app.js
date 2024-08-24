@@ -876,6 +876,27 @@ app.post("/verify_user", async (req, res) => {
     return res.status(500).json({ message: "Failed to save user details" });
   }
 });
+app.post("/verify_user_pw", async (req, res) => {
+  const { email, otp } = req.body;
+
+  if (!email || !otp) {
+    return res.status(400).json({ message: "One or more fields are empty!" });
+  }
+
+  try {
+    const otpVerification = await verifyOTPFromDatabase(email, otp);
+    if (!otpVerification) {
+      return res.status(400).json({ message: "Invalid OTP!" });
+    } else {
+      return res
+        .status(200)
+        .json({ message: "OTP Verification successfully!" });
+    }
+  } catch (error) {
+    console.error("Error during user signup:", error);
+    return res.status(500).json({ message: "Failed to change password" });
+  }
+});
 app.post("/sendOTP_user", async (req, res) => {
   const { email } = req.body;
 
@@ -1006,36 +1027,94 @@ app.post("/sendOTP_user_signup", async (req, res) => {
   }
 });
 
-app.post("/forget_pw", async (req, res) => {
-  const { email, password, otp } = req.body;
-
-  if (!email || !password || !otp) {
-    return res.status(400).json({ message: "One or more fields are empty!" });
-  }
+app.post("/sendOTP_pw", async (req, res) => {
+  const { email } = req.body;
 
   try {
     const userExists = await checkUserExistsByEmail_person(email);
     if (!userExists) {
-      return res.status(400).json({ message: "Email does not exist!" });
-    }
-    const otpVerification = await verifyOTPFromDatabase(email, otp);
-
-    if (!otpVerification) {
-      return res.status(400).json({ message: "Invalid OTP!" });
+      return res
+        .status(400)
+        .json({ message: "Email not exits! Please signup" });
     }
 
+    const otp = generateOTP();
+    const otpTimeout = new Date();
+    otpTimeout.setMinutes(otpTimeout.getMinutes() + 30);
+
+    const mailOptions = {
+      from: config.email.user,
+      to: email,
+      subject: "One-Time Password (OTP) for Email Verification",
+      text: `Dear User,
+    
+    Thank you for taking the time to verify your email address with us, please use the following One-Time Password (OTP):
+    
+    OTP: ${otp}
+    
+    Your security is our priority, and this OTP ensures that only authorized users gain access to our platform. Please enter the OTP within the specified time frame to complete the verification process successfully.
+    
+    For your security, please do not share this OTP with anyone. Our system is designed to protect your information, and sharing your OTP may compromise your account's security.
+    
+    If you did not initiate this request, or if you encounter any issues during the verification process, please contact our support team immediately for assistance.
+    
+    Thank you for choosing us. We look forward to serving you.
+    
+    Best regards,
+    Team GadgetRx.`,
+    };
+
+    connection.query(
+      "INSERT INTO otp_table (email, otp, timeout) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE otp=VALUES(otp), timeout=VALUES(timeout)",
+      [email, otp, otpTimeout],
+      (err, results) => {
+        if (err) {
+          console.error("Failed to store OTP in database:", err);
+          return res
+            .status(500)
+            .json({ message: "Error occurred! Please try again" });
+        }
+
+        transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+            console.error("Failed to send OTP email:", error);
+            return res
+              .status(500)
+              .json({ message: "Failed to send OTP email" });
+          }
+          console.log("Email sent:", info.response);
+          return res.status(200).json({ message: "OTP sent successfully!" });
+        });
+      }
+    );
+  } catch (error) {
+    console.error("Error during sending OTP:", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+app.post("/forget_pw", async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ message: "One or more fields are empty!" });
+  }
+  try {
     const hashedPassword = await bcrypt.hash(password, 10);
     const query = `
-            UPDATE t_user SET password = ? WHERE email = ?
-        `;
+      UPDATE t_user SET password = ? WHERE email = ?
+    `;
 
     connection.query(query, [hashedPassword, email], (err, results) => {
       if (err) {
         console.error("Failed to update user details:", err);
-        return res
-          .status(500)
-          .json({ message: "Failed to update user details" });
+        return res.status(500).json({ message: "Failed to update user details" });
       }
+
+      if (results.affectedRows === 0) {
+        return res.status(404).json({ message: "Email not found" });
+      }
+
       console.log("User details updated successfully");
       return res.status(200).json({ message: "Password reset successful" });
     });
