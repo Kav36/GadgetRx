@@ -213,10 +213,10 @@ function fetchOverallRating(shopId) {
     .catch((error) => console.error("Error fetching overall rating:", error));
 }
 function searchShops() {
-  const latitude = document.getElementById("latitude").value;
-  const longitude = document.getElementById("longitude").value;
-  const distance = document.getElementById("distance").value;
-  const rating = document.querySelector('input[name="rating"]:checked').value;
+  const latitude = document.getElementById("latitude").value || 0;
+  const longitude = document.getElementById("longitude").value|| 0;
+  const distance = document.getElementById("distance").value||0;
+  const rating = document.querySelector('input[name="rating"]:checked').value || 0;
   const shopType = document.getElementById("shopType").value;
 
   let url = `http://localhost:3000/nearest-shops?latitude=${latitude}&longitude=${longitude}&distance=${distance}&rating=${rating}&shopType=${shopType}`;

@@ -1,175 +1,287 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Panel - Users</title>
     <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
-        rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
     />
     <style>
-        .users-table-container {
-            max-height: 400px;
-            overflow-x: auto;
-            overflow-y: auto;
-        }
+      .users-table-container {
+        max-height: 400px;
+        overflow-x: auto;
+        overflow-y: auto;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="#">GadgetRx</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarText">
+        <ul class="navbar-nav mr-auto">
+          <li id="home" class="nav-item">
+            <a class="nav-link" href="admin.html">Home</a>
+          </li>
+          <!-- <li id="user" class="nav-item">
+            <a class="nav-link" href="a_user.html">User</a>
+          </li> -->
+          <li id="shop" class="nav-item">
+            <a class="nav-link" href="a_shop.html">Shops</a>
+          </li>
+          <li id="technicians" class="nav-item">
+            <a class="nav-link" href="a_tech.html">Technicians</a>
+          </li>
+          <li id="messages" class="nav-item">
+            <a class="nav-link" href="a_chat.html">Messages</a>
+          </li>
+          <li id="comments" class="nav-item">
+            <a class="nav-link" href="a_comment.html">Comments</a>
+          </li>
+          <li id="reviews" class="nav-item">
+            <a class="nav-link" href="a_reviews.html">Review</a>
+          </li>
+          <li id="appointment" class="nav-item">
+            <a class="nav-link" href="a_appoinment.html">Appointment</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
     <div class="container mt-5">
-        <h1 class="text-center mb-4">Manage Users</h1>
+      <h1 class="text-center mb-4">Manage Users</h1>
 
-        <!-- Add/Edit User Form -->
-        <form id="userForm" class="mb-4">
-            <!-- Existing form fields -->
-            <div class="mb-3">
-                <label for="name" class="form-label">Name</label>
-                <input type="text" class="form-control" id="name" required />
+      <!-- Add/Edit User Form -->
+      <form id="userForm" class="mb-4">
+        <!-- Existing form fields -->
+         <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name</label>
+                    <input type="text" class="form-control" id="name" required />
+                  </div>
+                  <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" class="form-control" id="username" required />
+                  </div>
+                  <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" required />
+                  </div>
+                  <div class="mb-3">
+                    <label for="contactnum" class="form-label">Contact Number</label>
+                    <input type="text" class="form-control" id="contactnum" required />
+                  </div>
             </div>
-            <div class="mb-3">
-                <label for="username" class="form-label">Username</label>
-                <input type="text" class="form-control" id="username" required />
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="latitude" class="form-label">Latitude</label>
+                    <input
+                      type="number"
+                      step="0.000001"
+                      class="form-control"
+                      id="latitude"
+                      required
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="longitude" class="form-label">Longitude</label>
+                    <input
+                      type="number"
+                      step="0.000001"
+                      class="form-control"
+                      id="longitude"
+                      required
+                    />
+                  </div>
+                  <!-- <div class="mb-3">
+                    <label for="profilePic" class="form-label">Profile Picture URL</label>
+                    <input type="text" class="form-control" id="profilePic" required />
+                  </div> -->
+                  <div class="mb-3">
+                    <label for="type" class="form-label">Type</label>
+                    <input type="text" class="form-control" id="type" required />
+                  </div>
             </div>
-            <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" required />
-            </div>
-            <div class="mb-3">
-                <label for="contactnum" class="form-label">Contact Number</label>
-                <input type="text" class="form-control" id="contactnum" required />
-            </div>
-            <div class="mb-3">
-                <label for="latitude" class="form-label">Latitude</label>
-                <input type="number" step="0.000001" class="form-control" id="latitude" required />
-            </div>
-            <div class="mb-3">
-                <label for="longitude" class="form-label">Longitude</label>
-                <input type="number" step="0.000001" class="form-control" id="longitude" required />
-            </div>
-            <div class="mb-3">
-                <label for="profilePic" class="form-label">Profile Picture URL</label>
-                <input type="text" class="form-control" id="profilePic" required />
-            </div>
-            <div class="mb-3">
-                <label for="type" class="form-label">Type</label>
-                <input type="text" class="form-control" id="type" required />
-            </div>
-            <input type="hidden" id="editUsername" />
-            <button type="submit" class="btn btn-primary">Add User</button>
-        </form>
+         </div>
+     
+        
+        <input type="hidden" id="editUsername" />
+        <button type="submit" class="btn btn-primary">Add User</button>
+      </form>
 
-        <!-- Search Input -->
-        <div class="mb-4">
-            <input
-                type="text"
-                class="form-control"
-                id="searchInput"
-                placeholder="Search users..."
-            />
-        </div>
+      <!-- Search Input -->
+      <div class="mb-4">
+        <input
+          type="text"
+          class="form-control"
+          id="searchInput"
+          placeholder="Search users..."
+        />
+      </div>
 
-        <!-- Users Table -->
-        <div class="users-table-container">
-            <table class="table table-striped" id="usersTable">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Username</th>
-                        <th>Email</th>
-                        <th>Contact Number</th>
-                        <th>Latitude</th>
-                        <th>Longitude</th>
-                        <th>Profile Picture</th>
-                        <th>Type</th> 
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- User rows will be populated here -->
-                </tbody>
-            </table>
-        </div>
+      <!-- Users Table -->
+      <div class="users-table-container">
+        <table class="table table-striped" id="usersTable">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Username</th>
+              <th>Email</th>
+              <th>Contact Number</th>
+              <th>Latitude</th>
+              <th>Longitude</th>
+              <th>Profile Picture</th>
+              <th>Type</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- User rows will be populated here -->
+          </tbody>
+        </table>
+      </div>
 
-        <!-- Edit User Modal -->
-        <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="editUserModalLabel">Edit User</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="editUserForm">
-                            <div class="mb-3">
-                                <label for="edit_name" class="form-label">Name</label>
-                                <input type="text" class="form-control" id="edit_name" required />
-                            </div>
-                            <div class="mb-3">
-                                <label for="edit_email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="edit_email" required />
-                            </div>
-                            <div class="mb-3">
-                                <label for="edit_contactnum" class="form-label">Contact Number</label>
-                                <input type="text" class="form-control" id="edit_contactnum" required />
-                            </div>
-                            <div class="mb-3">
-                                <label for="edit_latitude" class="form-label">Latitude</label>
-                                <input type="number" step="0.000001" class="form-control" id="edit_latitude" required />
-                            </div>
-                            <div class="mb-3">
-                                <label for="edit_longitude" class="form-label">Longitude</label>
-                                <input type="number" step="0.000001" class="form-control" id="edit_longitude" required />
-                            </div>
-                            <div class="mb-3">
+      <!-- Edit User Modal -->
+      <div
+        class="modal fade"
+        id="editUserModal"
+        tabindex="-1"
+        aria-labelledby="editUserModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="editUserModalLabel">Edit User</h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <form id="editUserForm">
+                <div class="mb-3">
+                  <label for="edit_name" class="form-label">Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="edit_name"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="edit_email" class="form-label">Email</label>
+                  <input
+                    type="email"
+                    class="form-control"
+                    id="edit_email"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="edit_contactnum" class="form-label"
+                    >Contact Number</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="edit_contactnum"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="edit_latitude" class="form-label">Latitude</label>
+                  <input
+                    type="number"
+                    step="0.000001"
+                    class="form-control"
+                    id="edit_latitude"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="edit_longitude" class="form-label"
+                    >Longitude</label
+                  >
+                  <input
+                    type="number"
+                    step="0.000001"
+                    class="form-control"
+                    id="edit_longitude"
+                    required
+                  />
+                </div>
+                <!-- <div class="mb-3">
                                 <label for="edit_profilePic" class="form-label">Profile Picture URL</label>
                                 <input type="text" class="form-control" id="edit_profilePic" required />
-                            </div>
-                            <div class="mb-3">
-                                <label for="edit_type" class="form-label">Type</label>
-                                <input type="text" class="form-control" id="edit_type" required />
-                            </div>
-                            <input type="hidden" id="edit_user_id" />
-                            <button type="submit" class="btn btn-primary">Save Changes</button>
-                        </form>
-                    </div>
+                            </div> -->
+                <div class="mb-3">
+                  <label for="edit_type" class="form-label">Type</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="edit_type"
+                    required
+                  />
                 </div>
+                <input type="hidden" id="edit_user_id" />
+                <button type="submit" class="btn btn-primary">
+                  Save Changes
+                </button>
+              </form>
             </div>
+          </div>
         </div>
-
+      </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            loadUsers();
+      document.addEventListener("DOMContentLoaded", function () {
+        loadUsers();
 
-            document.getElementById("userForm").addEventListener("submit", function (event) {
-                event.preventDefault();
-                addUser();
-            });
+        document
+          .getElementById("userForm")
+          .addEventListener("submit", function (event) {
+            event.preventDefault();
+            addUser();
+          });
 
-            document.getElementById("editUserForm").addEventListener("submit", function (event) {
-                event.preventDefault();
-                saveUser();
-            });
+        document
+          .getElementById("editUserForm")
+          .addEventListener("submit", function (event) {
+            event.preventDefault();
+            saveUser();
+          });
 
-            document.getElementById("searchInput").addEventListener("input", function () {
-                loadUsers(this.value);
-            });
-        });
+        document
+          .getElementById("searchInput")
+          .addEventListener("input", function () {
+            loadUsers(this.value);
+          });
+      });
 
-        function loadUsers(query = "") {
-            fetch(`http://localhost:3000/admin/users?search=${encodeURIComponent(query)}`)
-                .then((response) => response.json())
-                .then((data) => {
-                    const usersTable = document
-                        .getElementById("usersTable")
-                        .getElementsByTagName("tbody")[0];
-                    usersTable.innerHTML = "";
-                    data.forEach((user) => {
-                        const row = usersTable.insertRow();
-                        row.innerHTML = `
+      function loadUsers(query = "") {
+        fetch(
+          `http://localhost:3000/admin/users?search=${encodeURIComponent(
+            query
+          )}`
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            const usersTable = document
+              .getElementById("usersTable")
+              .getElementsByTagName("tbody")[0];
+            usersTable.innerHTML = "";
+            data.forEach((user) => {
+              const row = usersTable.insertRow();
+              row.innerHTML = `
                             <td>${user.name}</td>
                             <td>${user.username}</td>
                             <td>${user.email}</td>
@@ -183,85 +295,102 @@
                                 <button class="btn btn-danger btn-sm" onclick="deleteUser('${user.username}')">Delete</button>
                             </td>
                         `;
-                    });
-                });
-        }
+            });
+          });
+      }
 
-        function addUser() {
-            const formData = {
-                name: document.getElementById("name").value,
-                username: document.getElementById("username").value,
-                email: document.getElementById("email").value,
-                contactnum: document.getElementById("contactnum").value,
-                latitude: document.getElementById("latitude").value,
-                longitude: document.getElementById("longitude").value,
-                profilePic: document.getElementById("profilePic").value,
-                type: document.getElementById("type").value // Add this line
-            };
+      function addUser() {
+        const formData = {
+          name: document.getElementById("name").value,
+          username: document.getElementById("username").value,
+          email: document.getElementById("email").value,
+          contactnum: document.getElementById("contactnum").value,
+          latitude: document.getElementById("latitude").value,
+          longitude: document.getElementById("longitude").value,
+          profilePic: document.getElementById("profilePic").value || "NULL",
+          type: document.getElementById("type").value, // Add this line
+        };
 
-            fetch("http://localhost:3000/admin/users", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(formData),
-            })
-                .then((response) => response.json())
-                .then(() => {
-                    loadUsers();
-                    document.getElementById("userForm").reset();
-                });
-        }
+        fetch("http://localhost:3000/admin/users", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        })
+          .then((response) => response.json())
+          .then(() => {
+            loadUsers();
+            document.getElementById("userForm").reset();
+          });
+      }
 
-        function editUser(username, name, email, contactnum, latitude, longitude, profilePic, type) {
-            document.getElementById("edit_username").value = username;
-            document.getElementById("edit_name").value = name;
-            document.getElementById("edit_email").value = email;
-            document.getElementById("edit_contactnum").value = contactnum;
-            document.getElementById("edit_latitude").value = latitude;
-            document.getElementById("edit_longitude").value = longitude;
-            document.getElementById("edit_profilePic").value = profilePic;
-            document.getElementById("edit_type").value = type; // Add this line
-            document.getElementById("edit_user_id").value = username;
+      function editUser(
+        username,
+        name,
+        email,
+        contactnum,
+        latitude,
+        longitude,
+        type
+      ) {
+        document.getElementById("editUsername").value = username; // Corrected ID
+        document.getElementById("edit_name").value = name;
+        document.getElementById("edit_email").value = email;
+        document.getElementById("edit_contactnum").value = contactnum;
+        document.getElementById("edit_latitude").value = latitude;
+        document.getElementById("edit_longitude").value = longitude;
+        document.getElementById("edit_type").value = type;
+        document.getElementById("edit_user_id").value = username;
 
-            const modal = new bootstrap.Modal(document.getElementById("editUserModal"));
-            modal.show();
-        }
+        const modal = new bootstrap.Modal(
+          document.getElementById("editUserModal")
+        );
+        modal.show();
+      }
 
-        function saveUser() {
-            const formData = {
-                name: document.getElementById("edit_name").value,
-                email: document.getElementById("edit_email").value,
-                contactnum: document.getElementById("edit_contactnum").value,
-                latitude: document.getElementById("edit_latitude").value,
-                longitude: document.getElementById("edit_longitude").value,
-                profilePic: document.getElementById("edit_profilePic").value,
-                type: document.getElementById("edit_type").value // Add this line
-            };
+      function saveUser() {
+        const formData = {
+          name: document.getElementById("edit_name").value,
+          email: document.getElementById("edit_email").value,
+          contactnum: document.getElementById("edit_contactnum").value,
+          latitude: document.getElementById("edit_latitude").value,
+          longitude: document.getElementById("edit_longitude").value,
+          //profilePic: document.getElementById("edit_profilePic").value,
+          type: document.getElementById("edit_type").value, // Add this line
+        };
 
-            fetch(`http://localhost:3000/admin/users/${document.getElementById("edit_user_id").value}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(formData),
-            })
-                .then((response) => response.json())
-                .then(() => {
-                    loadUsers();
-                    document.getElementById("editUserModal").querySelector(".btn-close").click();
-                });
-        }
+        fetch(
+          `http://localhost:3000/admin/users/${
+            document.getElementById("edit_user_id").value
+          }`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+          }
+        )
+          .then((response) => response.json())
+          .then(() => {
+            loadUsers();
+            document
+              .getElementById("editUserModal")
+              .querySelector(".btn-close")
+              .click();
+          });
+      }
 
-        function deleteUser(username) {
-            fetch(`http://localhost:3000/admin/users/${username}`, {
-                method: "DELETE",
-            })
-                .then((response) => response.json())
-                .then(() => {
-                    loadUsers();
-                });
-        }
+      function deleteUser(username) {
+        fetch(`http://localhost:3000/admin/users/${username}`, {
+          method: "DELETE",
+        })
+          .then((response) => response.json())
+          .then(() => {
+            loadUsers();
+          });
+      }
     </script>
-</body>
+  </body>
 </html>

@@ -1558,21 +1558,27 @@ app.get("/appointments/:shop_name", (req, res) => {
   });
 });
 
-app.delete("/appointments/:username/:shop_name/:eventDateTime", (req, res) => {
-  const { username, shop_name, eventDateTime } = req.params;
+app.delete("/appointments/:username/:shop_name/:dateTime", (req, res) => {
+  const { username, shop_name, dateTime } = req.params;
+
+  // Format the dateTime to match the datetime format in the database
+  const formattedDateTime = formatEventDateTime(dateTime);
+
+  console.log(username, shop_name, formattedDateTime);
+
   const deleteQuery =
     "DELETE FROM appointments WHERE username = ? AND shop_name = ? AND date_time = ?";
 
   connection.query(
     deleteQuery,
-    [username, shop_name, eventDateTime],
+    [username, shop_name, formattedDateTime],
     (err, result) => {
       if (err) {
         console.error("Failed to delete appointment:", err);
-        res
-          .status(500)
-          .json({ error: "Failed to delete appointment", details: err });
-        return;
+        return res.status(500).json({
+          error: "Failed to delete appointment",
+          details: err.message,
+        });
       }
       if (result.affectedRows === 0) {
         return res.status(404).json({ message: "Appointment not found" });
@@ -1581,6 +1587,46 @@ app.delete("/appointments/:username/:shop_name/:eventDateTime", (req, res) => {
     }
   );
 });
+
+// Helper function to format eventDateTime
+function formatEventDateTime(eventDateTime) {
+  // Parse the date string using the Date constructor
+  const date = new Date(eventDateTime);
+
+  // Check if the date is valid
+  if (isNaN(date.getTime())) {
+    throw new Error("Invalid date format");
+  }
+
+  // Extract the date components in UTC
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(date.getUTCDate()).padStart(2, "0");
+  const hours = String(date.getUTCHours()).padStart(2, "0");
+  const minutes = String(date.getUTCMinutes()).padStart(2, "0");
+
+  // Return the formatted string with UTC components
+  return `${year}-${month}-${day} ${hours}:${minutes}:00`;
+}
+
+
+
+
+
+// Helper function to format eventDateTime
+function formatEventDateTime(eventDateTime) {
+  const date = new Date(eventDateTime);
+
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  const hours = String(date.getUTCHours()).padStart(2, '0');
+  const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+  const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
 
 app.delete("/deleteUser/:username", (req, res) => {
   const username = req.params.username;
@@ -1935,7 +1981,7 @@ app.put('/admin/appointments/:username/:shop_name/:date_time', (req, res) => {
   const { username, shop_name, date_time } = req.params;
   const { description } = req.body;
 
-  console.log('Received:', { username, shop_name, date_time, description });
+  //console.log('Received:', { username, shop_name, date_time, description });
 
   if (!description) {
     return res.status(400).json({ success: false, message: 'Description is required' });
@@ -1943,11 +1989,11 @@ app.put('/admin/appointments/:username/:shop_name/:date_time', (req, res) => {
 
   const formattedDateTime = moment(date_time).format('YYYY-MM-DD HH:mm:ss');
 
-  console.log('Formatted Date-Time:', formattedDateTime);
+  //console.log('Formatted Date-Time:', formattedDateTime);
 
   const sql = 'UPDATE appointments SET description = ? WHERE username = ? AND shop_name = ? AND date_time = ?';
 
-  console.log('Executing SQL:', { sql, parameters: [description, username, shop_name, formattedDateTime] });
+  //console.log('Executing SQL:', { sql, parameters: [description, username, shop_name, formattedDateTime] });
 
   connection.query(sql, [description, username, shop_name, formattedDateTime], (err, results) => {
     if (err) {
@@ -2157,13 +2203,32 @@ app.get('/admin/shops', (req, res) => {
 
 // Create a new shop
 app.post('/admin/shops', (req, res) => {
-  const { owner_username, shop_name, name, shop_email, contactnum, shop_type, shop_des, latitude, longitude, overall_rating, password, profilePic } = req.body;
-  const sql = 'INSERT INTO t_shop (owner_username, shop_name, name, shop_email, contactnum, shop_type, shop_des, latitude, longitude, overall_rating, password, profilePic) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-  connection.query(sql, [owner_username, shop_name, name, shop_email, contactnum, shop_type, shop_des, latitude, longitude, overall_rating, password, profilePic], (err, results) => {
-      if (err) throw err;
-      res.json({ success: true });
+  const { owner_username, shop_name, name, shop_email, contactnum, shop_type, shop_des, latitude, longitude} = req.body;
+
+  const sql = `
+    INSERT INTO t_shop 
+    (owner_username, shop_name, name, shop_email, contactnum, shop_type, shop_des, latitude, longitude) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON DUPLICATE KEY UPDATE 
+    name = VALUES(name), 
+    shop_email = VALUES(shop_email), 
+    contactnum = VALUES(contactnum), 
+    shop_type = VALUES(shop_type), 
+    shop_des = VALUES(shop_des), 
+    latitude = VALUES(latitude), 
+    longitude = VALUES(longitude);
+`;
+
+
+  connection.query(sql, [owner_username, shop_name, name, shop_email, contactnum, shop_type, shop_des, latitude, longitude], (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ success: false, message: 'Database error' });
+    }
+    res.json({ success: true });
   });
 });
+
 
 // Update a shop
 app.put('/admin/shops/:owner_username/:shop_name', (req, res) => {

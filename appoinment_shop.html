@@ -206,48 +206,44 @@
           });
       }
 
-        
       const today = moment().format('YYYY-MM-DD');
-    const maxDate = moment().add(7, 'days').format('YYYY-MM-DD');
-    $("#date").attr("min", today);
-    $("#date").attr("max", maxDate);
+      const maxDate = moment().add(7, 'days').format('YYYY-MM-DD');
+      $("#date").attr("min", today);
+      $("#date").attr("max", maxDate);
 
       function updateAvailableTimes(appointments) {
-    const selectedDate = $("#date").val();
-    const now = moment(); // Current date and time
-    const bookedTimes = appointments
-        .filter(app => moment(app.date_time).format("YYYY-MM-DD") === selectedDate)
-        .map(app => moment(app.date_time).format("HH:mm"));
+        const selectedDate = $("#date").val();
+        const now = moment(); // Current date and time
+        const bookedTimes = appointments
+          .filter(app => moment(app.date_time).format("YYYY-MM-DD") === selectedDate)
+          .map(app => moment(app.date_time).format("HH:mm"));
 
-    let selectedTime = $("#time").val();
-    let newSelectedTime = null;
+        let selectedTime = $("#time").val();
+        let newSelectedTime = null;
 
-    // Determine if the selected date is today
-    const isToday = moment(selectedDate).isSame(now, 'day');
+        // Determine if the selected date is today
+        const isToday = moment(selectedDate).isSame(now, 'day');
 
-    $("#time option").each(function () {
-        const option = $(this);
-        const optionTime = option.val();
+        $("#time option").each(function () {
+          const option = $(this);
+          const optionTime = option.val();
 
-        // Hide booked times and past times if the date is today
-        if (bookedTimes.includes(optionTime) || (isToday && moment(optionTime, "HH:mm").isBefore(now))) {
+          // Hide booked times and past times if the date is today
+          if (bookedTimes.includes(optionTime) || (isToday && moment(optionTime, "HH:mm").isBefore(now))) {
             option.hide();
-        } else {
+          } else {
             option.show();
             if (!newSelectedTime) {
-                newSelectedTime = optionTime; // Select the first available time
+              newSelectedTime = optionTime; // Select the first available time
             }
+          }
+        });
+
+        // Update selected time if it has changed
+        if (newSelectedTime !== selectedTime) {
+          $("#time").val(newSelectedTime);
         }
-    });
-
-    // Update selected time if it has changed
-    if (newSelectedTime !== selectedTime) {
-        $("#time").val(newSelectedTime);
-    }
-}
-
-
-
+      }
 
       // Initial calendar setup
       $("#calendar").fullCalendar({
@@ -259,16 +255,15 @@
         timezone: "local",
         events: [],
         eventRender: function (event, element) {
-    const currentUser = document.getElementById("username").value;
-    const currentShop = document.getElementById("shop_name").value;
+          const currentUser = document.getElementById("username").value;
+          const currentShop = document.getElementById("shop_name").value;
 
-    element.attr('data-date', event.date_time); // Set data-date attribute
+          element.attr('data-date', moment(event.date_time).format("YYYY-MM-DDTHH:mm:ss")); // Use ISO format
 
-    if (event.username === currentUser && event.shop_name === currentShop) {
-        element.append(`<button class="btn btn-danger btn-sm delete-btn">Delete</button>`);
-    }
-}
-,
+          if (event.username === currentUser && event.shop_name === currentShop) {
+            element.append(`<button class="btn btn-danger btn-sm delete-btn">Delete</button>`);
+          }
+        },
       });
 
       $("#shop_name").on("change", function () {
@@ -359,7 +354,12 @@
         const currentUser = $("#username").val();
         const currentShop = $("#shop_name").val();
         const eventDateTime = $(this).closest(".fc-event").data("date");
-        console.log(currentUser, currentShop, eventDateTime);
+
+        if (!eventDateTime) {
+          alert("Event time not found.");
+          return;
+        }
+
         try {
           const deleteResponse = await fetch(
             `http://localhost:3000/appointments/${currentUser}/${currentShop}/${eventDateTime}`,
@@ -369,9 +369,7 @@
           );
 
           if (!deleteResponse.ok) {
-            throw new Error(
-              `Failed to delete appointment: ${deleteResponse.statusText}`
-            );
+            throw new Error(`Failed to delete appointment: ${deleteResponse.statusText}`);
           }
 
           alert("Appointment deleted successfully!");

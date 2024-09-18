@@ -14,52 +14,94 @@
   </style>
 </head>
 <body>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">GadgetRx</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarText">
+      <ul class="navbar-nav mr-auto">
+        <li id="home" class="nav-item">
+          <a class="nav-link" href="admin.html">Home</a>
+        </li>
+        <li id="user" class="nav-item">
+          <a class="nav-link" href="a_user.html">Users</a>
+        </li>
+        <!-- <li id="shop" class="nav-item">
+          <a class="nav-link" href="a_shop.html">Shop</a>
+        </li> -->
+        <li id="technicians" class="nav-item">
+          <a class="nav-link" href="a_tech.html">Technicians</a>
+        </li>
+        <li id="messages" class="nav-item">
+          <a class="nav-link" href="a_chat.html">Messages</a>
+        </li>
+        <li id="comments" class="nav-item">
+          <a class="nav-link" href="a_comment.html">Comments</a>
+        </li>
+        <li id="reviews" class="nav-item">
+          <a class="nav-link" href="a_reviews.html">Review</a>
+        </li>
+        <li id="appointment" class="nav-item">
+          <a class="nav-link" href="a_appoinment.html">Appointment</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
   <div class="container mt-5">
     <h1 class="text-center mb-4">Manage Shop</h1>
 
     <!-- Add/Edit Shop Form -->
     <form id="shopForm" class="mb-4">
       <input type="hidden" id="editMode" value="false" />
-      <div class="mb-3">
-        <label for="owner_username" class="form-label">Owner Username</label>
-        <input type="text" class="form-control" id="owner_username" required />
+      <div class="row">
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label for="owner_username" class="form-label">Owner Username</label>
+            <input type="text" class="form-control" id="owner_username" required />
+          </div>
+          <div class="mb-3">
+            <label for="shop_name" class="form-label">Shop Name</label>
+            <input type="text" class="form-control" id="shop_name" required />
+          </div>
+          <div class="mb-3">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" class="form-control" id="name" required />
+          </div>
+          <div class="mb-3">
+            <label for="shop_email" class="form-label">Shop Email</label>
+            <input type="email" class="form-control" id="shop_email" required />
+          </div>
+          <div class="mb-3">
+            <label for="contactnum" class="form-label">Contact Number</label>
+            <input type="text" class="form-control" id="contactnum" required />
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label for="shop_type" class="form-label">Shop Type</label>
+            <input type="text" class="form-control" id="shop_type" required />
+          </div>
+          <div class="mb-3">
+            <label for="shop_des" class="form-label">Shop Description</label>
+            <textarea class="form-control" id="shop_des" required></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="latitude" class="form-label">Latitude</label>
+            <input type="text" class="form-control" id="latitude" required />
+          </div>
+          <div class="mb-3">
+            <label for="longitude" class="form-label">Longitude</label>
+            <input type="text" class="form-control" id="longitude" required />
+          </div>
+          <!-- <div class="mb-3">
+            <label for="profilePic" class="form-label">Profile Picture URL</label>
+            <input type="url" class="form-control" id="profilePic" required />
+          </div> -->
+        </div>
       </div>
-      <div class="mb-3">
-        <label for="shop_name" class="form-label">Shop Name</label>
-        <input type="text" class="form-control" id="shop_name" required />
-      </div>
-      <div class="mb-3">
-        <label for="name" class="form-label">Name</label>
-        <input type="text" class="form-control" id="name" required />
-      </div>
-      <div class="mb-3">
-        <label for="shop_email" class="form-label">Shop Email</label>
-        <input type="email" class="form-control" id="shop_email" required />
-      </div>
-      <div class="mb-3">
-        <label for="contactnum" class="form-label">Contact Number</label>
-        <input type="text" class="form-control" id="contactnum" required />
-      </div>
-      <div class="mb-3">
-        <label for="shop_type" class="form-label">Shop Type</label>
-        <input type="text" class="form-control" id="shop_type" required />
-      </div>
-      <div class="mb-3">
-        <label for="shop_des" class="form-label">Shop Description</label>
-        <textarea class="form-control" id="shop_des" required></textarea>
-      </div>
-      <div class="mb-3">
-        <label for="latitude" class="form-label">Latitude</label>
-        <input type="text" class="form-control" id="latitude" required />
-      </div>
-      <div class="mb-3">
-        <label for="longitude" class="form-label">Longitude</label>
-        <input type="text" class="form-control" id="longitude" required />
-      </div>
-      <div class="mb-3">
-        <label for="profilePic" class="form-label">Profile Picture URL</label>
-        <input type="url" class="form-control" id="profilePic" required />
-      </div>
+      
+     
       <button type="submit" class="btn btn-primary" id="submitButton">Add Shop</button>
       <button type="button" class="btn btn-secondary" id="cancelButton" style="display: none" onclick="cancelEdit()">Cancel Edit</button>
     </form>
@@ -142,7 +184,7 @@
               <td>${shop.longitude}</td>
               <td><img src="${shop.profilePic}" alt="Profile Pic" style="width: 50px; height: 50px;"></td>
               <td>
-                <button class="btn btn-primary btn-sm" onclick="editShop('${shop.owner_username}', '${shop.shop_name}', '${shop.name}', '${shop.shop_email}', '${shop.contactnum}', '${shop.shop_type}', '${shop.shop_des}', '${shop.latitude}', '${shop.longitude}', '${shop.profilePic}')">Edit</button>
+                <button class="btn btn-primary btn-sm" onclick="editShop('${shop.owner_username}', '${shop.shop_name}', '${shop.name}', '${shop.shop_email}', '${shop.contactnum}', '${shop.shop_type}', '${shop.shop_des}', '${shop.latitude}', '${shop.longitude}')">Edit</button>
                 <button class="btn btn-danger btn-sm" onclick="deleteShop('${shop.owner_username}', '${shop.shop_name}')">Delete</button>
               </td>
             `;
@@ -170,7 +212,7 @@
               <td>${shop.longitude}</td>
               <td><img src="${shop.profilePic}" alt="Profile Pic" style="width: 50px; height: 50px;"></td>
               <td>
-                <button class="btn btn-primary btn-sm" onclick="editShop('${shop.owner_username}', '${shop.shop_name}', '${shop.name}', '${shop.shop_email}', '${shop.contactnum}', '${shop.shop_type}', '${shop.shop_des}', '${shop.latitude}', '${shop.longitude}', '${shop.profilePic}')">Edit</button>
+                <button class="btn btn-primary btn-sm" onclick="editShop('${shop.owner_username}', '${shop.shop_name}', '${shop.name}', '${shop.shop_email}', '${shop.contactnum}', '${shop.shop_type}', '${shop.shop_des}', '${shop.latitude}', '${shop.longitude}')">Edit</button>
                 <button class="btn btn-danger btn-sm" onclick="deleteShop('${shop.owner_username}', '${shop.shop_name}')">Delete</button>
               </td>
             `;
@@ -189,7 +231,7 @@
         shop_des: document.getElementById("shop_des").value,
         latitude: document.getElementById("latitude").value,
         longitude: document.getElementById("longitude").value,
-        profilePic: document.getElementById("profilePic").value,
+        // profilePic: document.getElementById("profilePic").value,
       };
 
       fetch("http://localhost:3000/admin/shops", {
@@ -206,7 +248,7 @@
         });
     }
 
-    function editShop(owner_username, shop_name, name, shop_email, contactnum, shop_type, shop_des, latitude, longitude, profilePic) {
+    function editShop(owner_username, shop_name, name, shop_email, contactnum, shop_type, shop_des, latitude, longitude) {
       document.getElementById("editMode").value = "true";
       document.getElementById("owner_username").value = owner_username;
       document.getElementById("shop_name").value = shop_name;
@@ -217,7 +259,7 @@
       document.getElementById("shop_des").value = shop_des;
       document.getElementById("latitude").value = latitude;
       document.getElementById("longitude").value = longitude;
-      document.getElementById("profilePic").value = profilePic;
+      // document.getElementById("profilePic").value = profilePic;
 
       document.getElementById("submitButton").textContent = "Update Shop";
       document.getElementById("cancelButton").style.display = "inline-block";
@@ -234,7 +276,7 @@
         shop_des: document.getElementById("shop_des").value,
         latitude: document.getElementById("latitude").value,
         longitude: document.getElementById("longitude").value,
-        profilePic: document.getElementById("profilePic").value,
+        //profilePic: document.getElementById("profilePic").value,
       };
 
       fetch(`http://localhost:3000/admin/shops/${formData.owner_username}/${formData.shop_name}`, {
@@ -273,5 +315,6 @@
       }
     }
   </script>
+  
 </body>
 </html>

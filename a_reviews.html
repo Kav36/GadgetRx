@@ -17,11 +17,45 @@
     </style>
   </head>
   <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="#">GadgetRx</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarText">
+        <ul class="navbar-nav mr-auto">
+          <li id="home" class="nav-item">
+            <a class="nav-link" href="admin.html">Home</a>
+          </li>
+          <li id="user" class="nav-item">
+            <a class="nav-link" href="a_user.html">Users</a>
+          </li>
+          <li id="shop" class="nav-item">
+            <a class="nav-link" href="a_shop.html">Shops</a>
+          </li>
+          <li id="technicians" class="nav-item">
+            <a class="nav-link" href="a_tech.html">Technicians</a>
+          </li>
+          <li id="messages" class="nav-item">
+            <a class="nav-link" href="a_chat.html">Messages</a>
+          </li>
+          <li id="comments" class="nav-item">
+            <a class="nav-link" href="a_comment.html">Comments</a>
+          <!-- </li>
+          <li id="reviews" class="nav-item">
+            <a class="nav-link" href="a_reviews.html">Review</a>
+          </li> -->
+          <li id="appointment" class="nav-item">
+            <a class="nav-link" href="a_appoinment.html">Appointment</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
     <div class="container mt-5">
       <h1 class="text-center mb-4">Manage Reviews</h1>
 
       <!-- Add Review Form -->
-      <form id="reviewForm" class="mb-4">
+      <form id="reviewForm" class="mb-4" hidden>
         <div class="mb-3">
           <label for="person_id" class="form-label">Person ID</label>
           <input type="text" class="form-control" id="person_id" required />
