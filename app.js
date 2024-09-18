@@ -740,8 +740,8 @@ app.post('/signup_user', upload.single("profilePic"), async (req, res) => {
     const profilePicPath = req.file ? req.file.path : null; 
     console.log("Profile pic path:", profilePicPath);
 
-    const shopExists = await checkUserExistsByname_user(shop_email);
-    const userExists1 = await checkUserExistsByname_shop(shop_email);
+    const shopExists = await checkUserExistsByname_user(email);
+    const userExists1 = await checkUserExistsByname_shop(email);
     if (shopExists||userExists1) {
       return res.status(400).json({ message: "Email already exists!" });
     }

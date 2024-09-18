@@ -304,27 +304,24 @@ function setShopdata(shopId) {
       document.getElementById("email").textContent = data.shop_email;
       document.getElementById("profile-pic").src = data.profilePic;
 
-      // Calculate and set address from latitude and longitude
+      // Calculate and set address from latitude and longitude using OpenStreetMap's Nominatim API
       fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${data.latitude},${data.longitude}&key=AIzaSyCDx78wjiGh46Ei1oL-9b8M1-5zogF1VXs`
+        `https://nominatim.openstreetmap.org/reverse?lat=${data.latitude}&lon=${data.longitude}&format=json`
       )
         .then((response) => response.json())
         .then((geoData) => {
-          if (geoData.error_message || geoData.status !== "OK") {
-            console.error(
-              "Error fetching address:",
-              geoData.error_message || geoData.status
-            );
+          if (!geoData || !geoData.address) {
+            console.error("Error fetching address:", geoData);
             return;
           }
-          const address = geoData.results[0].formatted_address;
+
+          const address = geoData.display_name;
           const addressInput = document.getElementById("address");
           addressInput.textContent = address;
 
+          // Use Google Maps for the maps URL
           addressInput.addEventListener("click", () => {
-            const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-              address
-            )}`;
+            const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${data.latitude},${data.longitude}`;
             window.open(mapsUrl, "_blank");
           });
         })
@@ -332,6 +329,8 @@ function setShopdata(shopId) {
     })
     .catch((error) => console.error("Error fetching overall rating:", error));
 }
+
+
 
 function deactivateAccount(user) {
   event.preventDefault(); // Prevent the default form submission
