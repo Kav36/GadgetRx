@@ -2238,11 +2238,11 @@ app.post('/admin/shops', (req, res) => {
 // Update a shop
 app.put('/admin/shops/:owner_username/:shop_name', (req, res) => {
   const { owner_username, shop_name } = req.params;
-  const { name, shop_email, contactnum, shop_type, shop_des, latitude, longitude, overall_rating, password, profilePic } = req.body;
+  const { name, shop_email, contactnum, shop_type, shop_des, latitude, longitude, overall_rating } = req.body;
 
-  const sql = 'UPDATE t_shop SET name = ?, shop_email = ?, contactnum = ?, shop_type = ?, shop_des = ?, latitude = ?, longitude = ?, overall_rating = ?, password = ?, profilePic = ? WHERE owner_username = ? AND shop_name = ?';
+  const sql = 'UPDATE t_shop SET name = ?, shop_email = ?, contactnum = ?, shop_type = ?, shop_des = ?, latitude = ?, longitude = ?, overall_rating = ? WHERE owner_username = ? AND shop_name = ?';
 
-  connection.query(sql, [name, shop_email, contactnum, shop_type, shop_des, latitude, longitude, overall_rating, password, profilePic, owner_username, shop_name], (err, results) => {
+  connection.query(sql, [name, shop_email, contactnum, shop_type, shop_des, latitude, longitude, overall_rating, owner_username, shop_name], (err, results) => {
     if (err) {
       console.error('Error executing SQL:', err.message);
       return res.status(500).json({ success: false, message: 'Database error' });
@@ -2345,8 +2345,8 @@ app.get('/admin/users', (req, res) => {
 // Create a new user
 app.post('/admin/users', (req, res) => {
   const { name, username, email, contactnum, latitude, longitude, password, profilePic } = req.body;
-  const sql = 'INSERT INTO t_user (name, username, email, contactnum, latitude, longitude, password, profilePic) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
-  connection.query(sql, [name, username, email, contactnum, latitude, longitude, password, profilePic], (err, results) => {
+  const sql = 'INSERT INTO t_user (name, username, email, contactnum, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?)';
+  connection.query(sql, [name, username, email, contactnum, latitude, longitude], (err, results) => {
     if (err) throw err;
     res.json({ success: true });
   });
@@ -2355,11 +2355,11 @@ app.post('/admin/users', (req, res) => {
 // Update a user
 app.put('/admin/users/:username', (req, res) => {
   const { username } = req.params;
-  const { name, email, contactnum, latitude, longitude, password, profilePic } = req.body;
+  const { name, email, contactnum, latitude, longitude, } = req.body;
 
-  const sql = 'UPDATE t_user SET name = ?, email = ?, contactnum = ?, latitude = ?, longitude = ?, password = ?, profilePic = ? WHERE username = ?';
+  const sql = 'UPDATE t_user SET name = ?, email = ?, contactnum = ?, latitude = ?, longitude = ? WHERE username = ?';
 
-  connection.query(sql, [name, email, contactnum, latitude, longitude, password, profilePic, username], (err, results) => {
+  connection.query(sql, [name, email, contactnum, latitude, longitude, username], (err, results) => {
     if (err) {
       console.error('Error executing SQL:', err.message);
       return res.status(500).json({ success: false, message: 'Database error' });
