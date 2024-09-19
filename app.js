@@ -1567,11 +1567,14 @@ app.delete("/appointments/:username/:shop_name/:dateTime", (req, res) => {
   console.log(username, shop_name, formattedDateTime);
 
   const deleteQuery =
-    "DELETE FROM appointments WHERE username = ? AND shop_name = ? AND date_time = ?";
+    "DELETE FROM appointments WHERE username = ? AND shop_name = ? AND date_time LIKE ?";
+
+  // Add wildcard characters to allow partial matching
+  const likeFormattedDateTime = `%${formattedDateTime}%`;
 
   connection.query(
     deleteQuery,
-    [username, shop_name, formattedDateTime],
+    [username, shop_name, likeFormattedDateTime],
     (err, result) => {
       if (err) {
         console.error("Failed to delete appointment:", err);
@@ -1588,6 +1591,7 @@ app.delete("/appointments/:username/:shop_name/:dateTime", (req, res) => {
   );
 });
 
+
 // Helper function to format eventDateTime
 function formatEventDateTime(eventDateTime) {
   // Parse the date string using the Date constructor
@@ -1598,16 +1602,17 @@ function formatEventDateTime(eventDateTime) {
     throw new Error("Invalid date format");
   }
 
-  // Extract the date components in UTC
-  const year = date.getUTCFullYear();
-  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
-  const day = String(date.getUTCDate()).padStart(2, "0");
-  const hours = String(date.getUTCHours()).padStart(2, "0");
-  const minutes = String(date.getUTCMinutes()).padStart(2, "0");
+  // Extract the date components
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
 
-  // Return the formatted string with UTC components
-  return `${year}-${month}-${day} ${hours}:${minutes}:00`;
+  // Return the formatted string with date and time
+  return `${year}-${month}-${day} ${hours}:${minutes}`;
 }
+
 
 
 
